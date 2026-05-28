@@ -33,7 +33,7 @@ else:
                    tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", attr="Esri")
     folium.TileLayer(tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", attr="Esri", name="Labels", overlay=True).add_to(m)
     m.add_child(folium.LatLngPopup())
-    map_data = st_folium(m, height=400, width=1200)
+    map_data = st_folium(m, height=600, width=1600)
 
     if map_data and map_data.get('last_clicked'):
         st.session_state.lat_f = map_data['last_clicked']['lat']
