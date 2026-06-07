@@ -71,24 +71,25 @@ else:
         unidad_vv = c1.selectbox("UNIDAD DE VV/104", ["SELECCIONAR", "ELMER RODRIGUEZ"])
         canal = c2.selectbox("CANAL DE ENTRADA", ["SELECCIONAR", "CLL-104", "VIDEO-VIGILANCIA"])
         unidad_despacho = c2.selectbox("UNIDAD DE DESPACHO", ["SELECCIONAR", "ISMAEL PEÑA"])
-        t_inicial = c3.time_input("T. INICIAL")
-        h_despacho = c3.time_input("H. DESPACHO")
+        t_inicial = c3.time_input("T. INICIAL", step=60)
+        h_despacho = c3.time_input("H. DESPACHO", step=60)
         camara_id = c3.text_input("CAMARA/ID")
-        h_atencion = c4.time_input("H. ATENCION")
-        h_cierre = c4.time_input("H. CIERE")
+        h_atencion = c4.time_input("H. ATENCION", step=60)
+        h_cierre = c4.time_input("H. CIERE", step=60)
 
         # INCIDENTES
         st.subheader("📋 Incidentes y Cierre")
-        lista_maestra = ["SELECCIONAR", "Hurto de Vehículo", "Robo de Vehículo", "Accidente"]
+        lista_maestra_a = ["SELECCIONAR", "Hurto de Vehículo", "Robo de Vehículo", "Accidente"]
+        lista_maestra_b = ["SELECCIONAR", "Automovil", "Motocicleta", "Bicicleta", "Peatón"]
         c8, c9 = st.columns(2)
-        tipo_inc = c8.selectbox("TIPO DE INCIDENTES", lista_maestra)
-        subtipo_inc = c9.selectbox("SUBTIPO DE INCIDENTES", lista_maestra)
+        tipo_inc = c8.selectbox("TIPO DE INCIDENTES", lista_maestra_a)
+        subtipo_inc = c9.selectbox("SUBTIPO DE INCIDENTES", lista_maestra_b)
 
         # LÓGICA DE VISIBILIDAD PARA POSITIVO
         if modo == "POSITIVO":
             c_cierre1, c_cierre2 = st.columns(2)
-            cierre_tipo = c_cierre1.selectbox("CIERRE TIPO", lista_maestra)
-            cierre_subtipo = c_cierre2.selectbox("CIERRE SUBTIPO", lista_maestra)
+            cierre_tipo = c_cierre1.selectbox("CIERRE TIPO", lista_maestra_a)
+            cierre_subtipo = c_cierre2.selectbox("CIERRE SUBTIPO", lista_maestra_b)
 
             st.subheader("✅ Selección de Positivos")
             cols = st.columns(6)
