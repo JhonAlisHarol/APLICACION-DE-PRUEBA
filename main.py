@@ -8,7 +8,7 @@ from supabase import create_client
 
 # --- 1. CONFIGURACIÓN SUPABASE ---
 # Coloca aquí tus datos reales de la sección API de tu proyecto
-SUPABASE_URL = "https://gqwxrxszojvphfbnkcfv.supabase.co"
+SUPABASE_URL = "https://gqwxrszojvphfbnkcfv.supabase.co"
 SUPABASE_KEY = "sb_publishable_Y-CKD8q9mg8pBQ-CIJ88Bw_v83hmqOL"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
