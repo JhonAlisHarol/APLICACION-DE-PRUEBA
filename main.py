@@ -4,30 +4,21 @@ import folium
 from streamlit_folium import st_folium
 import os
 from datetime import datetime
+from supabase import create_client
 
-# 1. Configuración de página
+# --- 1. CONFIGURACIÓN SUPABASE ---
+# Coloca aquí tus datos reales de la sección API de tu proyecto
+SUPABASE_URL = "https://gqwxrxszojvphfbnkcfv.supabase.co"
+SUPABASE_KEY = "sb_publishable_Y-CKD8q9mg8pBQ-CIJ88Bw_v83hmqOL"
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# 2. Configuración de página
 st.set_page_config(page_title="C5 - Registro Maestro", layout="wide")
 
-# 2. Ruta del archivo respaldada
-archivo_excel = "REGISTROS_C5.csv"
-
-# 3. Inicializar estados de la aplicación (Base de datos persistente en sesión)
-if "autenticado" not in st.session_state: 
-    st.session_state.autenticado = False
-if 'lat_f' not in st.session_state: 
-    st.session_state.lat_f = ""
-if 'lon_f' not in st.session_state: 
-    st.session_state.lon_f = ""
-
-# Inicializar la base de datos interna de la app cargando el archivo si existe
-if "db_registros" not in st.session_state:
-    if os.path.exists(archivo_excel):
-        try:
-            st.session_state.db_registros = pd.read_csv(archivo_excel, encoding="utf-8-sig")
-        except Exception:
-            st.session_state.db_registros = pd.DataFrame()
-    else:
-        st.session_state.db_registros = pd.DataFrame()
+# 3. Inicializar estados
+if "autenticado" not in st.session_state: st.session_state.autenticado = False
+if 'lat_f' not in st.session_state: st.session_state.lat_f = ""
+if 'lon_f' not in st.session_state: st.session_state.lon_f = ""
 
 def pantalla_login():
     st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
@@ -45,8 +36,6 @@ if not st.session_state.autenticado:
     pantalla_login()
 else:
     st.title("🛡️ REGISTROS POSITIVOS DEL C.O.N - C5")
-    
-    # Pestañas para separar las pantallas por completo
     tab_registro, tab_visor = st.tabs(["📝 Formulario de Registro", "📊 Visor de Base de Datos y Exportación"])
 
     # --- VENTANA 1: FORMULARIO DE REGISTRO ---
@@ -134,69 +123,63 @@ else:
             
             if submitted:
                 nuevo_registro = {
-                    "FECHA_HORA": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "MODO": modo,
-                    "PROVINCIA": provincia,
-                    "DISTRITO": distrito,
-                    "CORREGIMIENTO": corregimiento,
-                    "REFERENCIA": referencia,
-                    "ZP_POLICIAL": zp_policial,
-                    "RECURSOS": recursos,
-                    "FECHA": str(fecha),
-                    "CENTRO_DE_MANDO": centro_mando,
-                    "UNIDAD_VV": unidad_vv,
-                    "CANAL_ENTRADA": canal,
-                    "UNIDAD_DESPACHO": unidad_despacho,
-                    "T_INICIAL": str(t_inicial),
-                    "H_DESPACHO": str(h_despacho),
-                    "CAMARA_ID": camara_id,
-                    "H_ATENCION": str(h_atencion),
-                    "H_CIERRE": str(h_cierre),
-                    "TIPO_INCIDENTE": tipo_inc,
-                    "SUBTIPO_INCIDENTE": subtipo_inc,
-                    "CIERRE_TIPO": cierre_tipo,
-                    "CIERRE_SUBTIPO": cierre_subtipo,
-                    "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5, "P6": p6,
-                    "NARRATIVA": narrativa,  # <- ¡CORREGIDO AQUÍ! (Ya no dará NameError)
-                    "LINK_VIDEO": link_video,
-                    "LATITUD": st.session_state.lat_f,
-                    "LONGITUD": st.session_state.lon_f
-                }
-                
-                df_fila = pd.DataFrame([nuevo_registro])
-                
-                # 1. Guardar en la memoria interna de la aplicación (Infalible)
-                st.session_state.db_registros = pd.concat([st.session_state.db_registros, df_fila], ignore_index=True)
-                
-                # 2. Intentar guardar una copia física en el archivo local de forma silenciosa
-                try:
-                    st.session_state.db_registros.to_csv(archivo_excel, index=False, encoding="utf-8-sig", sep=";")
-                except Exception:
-                    pass
-                
-                st.success(f"✔️ Registro {modo} procesado y añadido exitosamente.")
-
-    # --- VENTANA 2: VISOR DE DATOS E EXPORTACIÓN ---
-    with tab_visor:
-        st.subheader("📊 Visor de Base de Datos y Exportación")
-        
-        # Leemos los datos directamente desde el Session State interno
-        if not st.session_state.db_registros.empty:
-            st.dataframe(st.session_state.db_registros, use_container_width=True)
+                "FECHA_HORA": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "MODO": modo,
+                "PROVINCIA": provincia,
+                "DISTRITO": distrito,
+                "CORREGIMIENTO": corregimiento,
+                "REFERENCIA": referencia,
+                "ZP_POLICIAL": zp_policial,
+                "RECURSOS": recursos,
+                "FECHA": str(fecha),
+                "CENTRO_DE_MANDO": centro_mando,
+                "UNIDAD_VV": unidad_vv,
+                "CANAL_ENTRADA": canal,
+                "UNIDAD_DESPACHO": unidad_despacho,
+                "T_INICIAL": str(t_inicial),
+                "H_DESPACHO": str(h_despacho),
+                "CAMARA_ID": camara_id,
+                "H_ATENCION": str(h_atencion),
+                "H_CIERRE": str(h_cierre),
+                "TIPO_INCIDENTE": tipo_inc,
+                "SUBTIPO_INCIDENTE": subtipo_inc,
+                "CIERRE_TIPO": cierre_tipo,
+                "CIERRE_SUBTIPO": cierre_subtipo,
+                "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5, "P6": p6,
+                "NARRATIVA": narrativa,
+                "LINK_VIDEO": link_video,
+                "LATITUD": str(st.session_state.lat_f),
+                "LONGITUD": str(st.session_state.lon_f)
+            }
             
-            # Botón de exportación directa y limpia
-            csv_data = st.session_state.db_registros.to_csv(index=False, encoding="utf-8-sig").encode('utf-8-sig')
-            st.download_button(
-                label="📥 Descargar Base de Datos para Excel",
-                data=csv_data,
-                file_name="REGISTROS_C5.csv",
-                mime="text/csv",
-                key="btn_descarga_c5_final"
-            )
-        else:
-            st.info("💡 Aún no existen registros guardados. Use la pestaña de 'Formulario de Registro' para añadir el primer reporte.")
+            # 2. GUARDADO EN LA NUBE (Supabase)
+            try:
+                # Esta es la línea que falta para que se vaya a la nube
+                supabase.table("registros_c5").insert(nuevo_registro).execute()
+                st.success("✔️ Registro guardado exitosamente en la nube.")
+            except Exception as e:
+                st.error(f"Error al conectar con la nube: {e}")
 
-    # Cierre de sesión en la barra lateral
+    # --- VENTANA 2: VISOR ---
+    with tab_visor:
+        st.subheader("📊 Visor de Base de Datos")
+        
+        # Leemos directamente de la nube al presionar el botón
+        if st.button("🔄 Cargar datos desde la nube"):
+            try:
+                response = supabase.table("registros_c5").select("*").execute()
+                df = pd.DataFrame(response.data)
+                
+                if not df.empty:
+                    st.dataframe(df, use_container_width=True)
+                    # Descarga para Excel
+                    csv = df.to_csv(index=False).encode('utf-8-sig')
+                    st.download_button("📥 Descargar a CSV", csv, "registros_nube.csv", "text/csv")
+                else:
+                    st.info("No hay registros en la base de datos.")
+            except Exception as e:
+                st.error(f"Error al conectar con Supabase: {e}")
+
     if st.sidebar.button("Cerrar Sesión"):
         st.session_state.autenticado = False
         st.rerun()
