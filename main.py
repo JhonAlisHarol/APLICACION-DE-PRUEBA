@@ -79,8 +79,8 @@ else:
 
         # INCIDENTES
         st.subheader("📋 Incidentes y Cierre")
-        lista_maestra_a = ["SELECCIONAR", "Hurto de Vehículo", "Robo de Vehículo", "Accidente"]
-        lista_maestra_b = ["SELECCIONAR", "Automovil", "Motocicleta", "Bicicleta", "Peatón"]
+        lista_maestra_a = ["SELECCIONAR", "ACCIDENTE DE TRÁNSITO", "ACCIDENTES", "ALERTAS"]
+        lista_maestra_b = ["SELECCIONAR", "A LOCAL COMERCIAL", "A RESIDENCIA", "A PROPIEDAD"]
         c8, c9 = st.columns(2)
         tipo_inc = c8.selectbox("TIPO DE INCIDENTES", lista_maestra_a)
         subtipo_inc = c9.selectbox("SUBTIPO DE INCIDENTES", lista_maestra_b)
