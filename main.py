@@ -60,8 +60,8 @@ else:
         
         col_loc4, col_loc5, col_loc6 = st.columns(3)
         referencia = col_loc4.text_input("REFERENCIA")
-        zp_policial = col_loc5.selectbox("ZP POLICIALES / ENLACE", ["SELECCIONAR", "Z P - ARRAIJÁN", "Z P - SAN FRANCISCO"])
-        recursos = col_loc6.selectbox("RECURSOS", ["SELECCIONAR", "PATRULLA", "LINCE PN", "AMBULANCIA 911"])
+        zp_policial = col_loc5.selectbox("ZP POLICIALES / ENLACE", ["SELECCIONAR", "3RA ZP COLON", "4TA ZP CHIRIQUI"])
+        recursos = col_loc6.selectbox("RECURSOS", ["SELECCIONAR", "PATRULLA", "LINCE", "CICLISTA"])
 
         # TIEMPOS, UNIDADES Y CÁMARAS
         st.subheader("⏱️ Tiempos, Unidades y Cámaras")
@@ -93,7 +93,7 @@ else:
 
             st.subheader("✅ Selección de Positivos")
             cols = st.columns(6)
-            lista_pos = ["SELECCIONAR", "VEHÍCULO RECUPERADO", "CIUDADANO APREHENDIDO"]
+            lista_pos = ["SELECCIONAR", "APOYO AL CIUDADANO", "ARTICULOS RECUPERADOS"]
             p1 = cols[0].selectbox("P1", lista_pos)
             p2 = cols[1].selectbox("P2", lista_pos)
             p3 = cols[2].selectbox("P3", lista_pos)
