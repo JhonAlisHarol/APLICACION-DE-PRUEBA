@@ -121,8 +121,8 @@ else:
             
             submitted = st.form_submit_button("Guardar Registro")
             
-            if submitted:
-                nuevo_registro = {
+        if submitted:
+            nuevo_registro = {
                 "FECHA_HORA": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "MODO": modo,
                 "PROVINCIA": provincia,
