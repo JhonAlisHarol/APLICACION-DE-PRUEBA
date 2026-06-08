@@ -150,9 +150,9 @@ else:
                     "LINK_VIDEO": link_video,
                     "LATITUD": str(st.session_state.lat_f),
                     "LONGITUD": str(st.session_state.lon_f)
-                }
+                    }
             
-            # 2. GUARDADO EN LA NUBE (Supabase)
+                # 2. GUARDADO EN LA NUBE (Supabase)
                 try:
                 # Esta es la línea que falta para que se vaya a la nube
                     supabase.table("registros_c5").insert(nuevo_registro).execute()
