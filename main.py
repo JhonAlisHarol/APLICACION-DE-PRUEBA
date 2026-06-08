@@ -152,13 +152,13 @@ else:
                     "LONGITUD": str(st.session_state.lon_f)
                 }
             
-                # 2. GUARDADO EN LA NUBE (Supabase)
-                try:
-                    # Esta es la línea que falta para que se vaya a la nube
-                    supabase.table("registros_c5").insert(nuevo_registro).execute()
-                    st.success("✔️ Registro guardado exitosamente en la nube.")
-                except Exception as e:
-                    st.error(f"Error al conectar con la nube: {e}")
+            # 2. GUARDADO EN LA NUBE (Supabase)
+            try:
+                # Esta es la línea que falta para que se vaya a la nube
+                supabase.table("registros_c5").insert(nuevo_registro).execute()
+                st.success("✔️ Registro guardado exitosamente en la nube.")
+            except Exception as e:
+                st.error(f"Error al conectar con la nube: {e}")
 
     # --- VENTANA 2: VISOR ---
     with tab_visor:
