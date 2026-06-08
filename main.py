@@ -41,7 +41,7 @@ else:
     # --- VENTANA 1: FORMULARIO DE REGISTRO ---
     with tab_registro:
         # Mapa
-        m = folium.Map(location=[8.9824, -79.5199], zoom_start=30, 
+        m = folium.Map(location=[8.9824, -79.5199], zoom_start=10, 
                        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", attr="Esri")
         folium.TileLayer(tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", attr="Esri", name="Labels", overlay=True).add_to(m)
         m.add_child(folium.LatLngPopup())
