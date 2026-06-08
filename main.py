@@ -123,42 +123,42 @@ else:
             
             if submitted:
                 nuevo_registro = {
-                "FECHA_HORA": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "MODO": modo,
-                "PROVINCIA": provincia,
-                "DISTRITO": distrito,
-                "CORREGIMIENTO": corregimiento,
-                "REFERENCIA": referencia,
-                "ZP_POLICIAL": zp_policial,
-                "RECURSOS": recursos,
-                "FECHA": str(fecha),
-                "CENTRO_DE_MANDO": centro_mando,
-                "UNIDAD_VV": unidad_vv,
-                "CANAL_ENTRADA": canal,
-                "UNIDAD_DESPACHO": unidad_despacho,
-                "T_INICIAL": str(t_inicial),
-                "H_DESPACHO": str(h_despacho),
-                "CAMARA_ID": camara_id,
-                "H_ATENCION": str(h_atencion),
-                "H_CIERRE": str(h_cierre),
-                "TIPO_INCIDENTE": tipo_inc,
-                "SUBTIPO_INCIDENTE": subtipo_inc,
-                "CIERRE_TIPO": cierre_tipo,
-                "CIERRE_SUBTIPO": cierre_subtipo,
-                "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5, "P6": p6,
-                "NARRATIVA": narrativa,
-                "LINK_VIDEO": link_video,
-                "LATITUD": str(st.session_state.lat_f),
-                "LONGITUD": str(st.session_state.lon_f)
-            }
+                    "FECHA_HORA": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "MODO": modo,
+                    "PROVINCIA": provincia,
+                    "DISTRITO": distrito,
+                    "CORREGIMIENTO": corregimiento,
+                    "REFERENCIA": referencia,
+                    "ZP_POLICIAL": zp_policial,
+                    "RECURSOS": recursos,
+                    "FECHA": str(fecha),
+                    "CENTRO_DE_MANDO": centro_mando,
+                    "UNIDAD_VV": unidad_vv,
+                    "CANAL_ENTRADA": canal,
+                    "UNIDAD_DESPACHO": unidad_despacho,
+                    "T_INICIAL": str(t_inicial),
+                    "H_DESPACHO": str(h_despacho),
+                    "CAMARA_ID": camara_id,
+                    "H_ATENCION": str(h_atencion),
+                    "H_CIERRE": str(h_cierre),
+                    "TIPO_INCIDENTE": tipo_inc,
+                    "SUBTIPO_INCIDENTE": subtipo_inc,
+                    "CIERRE_TIPO": cierre_tipo,
+                    "CIERRE_SUBTIPO": cierre_subtipo,
+                    "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5, "P6": p6,
+                    "NARRATIVA": narrativa,
+                    "LINK_VIDEO": link_video,
+                    "LATITUD": str(st.session_state.lat_f),
+                    "LONGITUD": str(st.session_state.lon_f)
+                }
             
-            # 2. GUARDADO EN LA NUBE (Supabase)
-            try:
-                # Esta es la línea que falta para que se vaya a la nube
-                supabase.table("registros_c5").insert(nuevo_registro).execute()
-                st.success("✔️ Registro guardado exitosamente en la nube.")
-            except Exception as e:
-                st.error(f"Error al conectar con la nube: {e}")
+                # 2. GUARDADO EN LA NUBE (Supabase)
+                try:
+                    # Esta es la línea que falta para que se vaya a la nube
+                    supabase.table("registros_c5").insert(nuevo_registro).execute()
+                    st.success("✔️ Registro guardado exitosamente en la nube.")
+                except Exception as e:
+                    st.error(f"Error al conectar con la nube: {e}")
 
     # --- VENTANA 2: VISOR ---
     with tab_visor:
