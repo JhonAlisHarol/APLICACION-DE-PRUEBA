@@ -65,9 +65,9 @@ else:
             # UBICACIÓN Y RECURSOS
             st.subheader("📍 Ubicación y Recursos")
             col_loc1, col_loc2, col_loc3 = st.columns(3)
-            provincia = col_loc1.selectbox("PROVINCIA", ["SELECCIONAR", "LOS SANTOS", "VERAGUAS", "PANAMA", "PANAMA OESTE"])
-            distrito = col_loc2.selectbox("DISTRITO", ["SELECCIONAR", "AGUADULCE"])
-            corregimiento = col_loc3.selectbox("CORREGIMIENTO", ["SELECCIONAR", "24 DE DICIEMBRE", "ACHIOTE", "AGUA BUENA"])
+            provincia = col_loc1.selectbox("PROVINCIA", ["SELECCIONAR", "LOS SANTOS", "VERAGUAS", "PANAMA", "COLÓN"])
+            distrito = col_loc2.selectbox("DISTRITO", ["SELECCIONAR", "COLÓN"])
+            corregimiento = col_loc3.selectbox("CORREGIMIENTO", ["SELECCIONAR", "BARRIO NORTE", "ACHIOTE", "AGUA BUENA"])
             
             col_loc4, col_loc5, col_loc6 = st.columns(3)
             referencia = col_loc4.text_input("REFERENCIA")
