@@ -31,7 +31,7 @@ if 'lat_f' not in st.session_state: st.session_state.lat_f = ""
 if 'lon_f' not in st.session_state: st.session_state.lon_f = ""
 
 def pantalla_login():
-    st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
+    st.title("🔐 INGRESAR DATOS POSITIVOS C.O.N - C5")
     user = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")
     if st.button("Iniciar Sesión"):
