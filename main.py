@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
-import os
-from datetime import datetime
+from datetime import datetime, date, time
 from supabase import create_client
 
 # --- 1. CONFIGURACIÓN SUPABASE ---
@@ -14,7 +13,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # 2. Configuración de página
 st.set_page_config(page_title="C5 - Registro Maestro", layout="wide", initial_sidebar_state="expanded")
 
-# --- CSS PARA OCULTAR MENÚ Y ESTILOS ---
+# --- CSS PARA ESTILOS ---
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
@@ -30,15 +29,19 @@ if "autenticado" not in st.session_state: st.session_state.autenticado = False
 if 'lat_f' not in st.session_state: st.session_state.lat_f = ""
 if 'lon_f' not in st.session_state: st.session_state.lon_f = ""
 
+def calcular_minutos(t_inicio, t_evento):
+    d1 = datetime.combine(date.today(), t_inicio)
+    d2 = datetime.combine(date.today(), t_evento)
+    return round((d2 - d1).total_seconds() / 60, 2)
+
 def pantalla_login():
-    st.title("🔐 INGRESAR DATOS POSITIVOS C.O.N - C5")
+    st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
     user = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")
     if st.button("Iniciar Sesión"):
         usuarios_permitidos = {"CONC5": "12345", "ELMER RODRIGUEZ": "ELIZAharol31"}
         if user in usuarios_permitidos and usuarios_permitidos[user] == password:
             st.session_state.autenticado = True
-            st.session_state.usuario = user
             st.rerun()
         else:
             st.error("Usuario o contraseña incorrectos")
@@ -51,7 +54,6 @@ else:
     # Mapa
     m = folium.Map(location=[8.9824, -79.5199], zoom_start=10, 
                    tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", attr="Esri")
-    folium.TileLayer(tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", attr="Esri", name="Labels", overlay=True).add_to(m)
     m.add_child(folium.LatLngPopup())
     map_data = st_folium(m, height=400, width=1200)
 
@@ -87,10 +89,21 @@ else:
         canal = c2.selectbox("CANAL DE ENTRADA", ["SELECCIONAR", "CLL-104", "VIDEO-VIGILANCIA"])
         unidad_despacho = c2.selectbox("UNIDAD DE DESPACHO", ["SELECCIONAR", "ISMAEL PEÑA"])
         t_inicial = c3.time_input("T. INICIAL", step=60)
+        
+        # Tiempos de cálculo
         h_despacho = c3.time_input("H. DESPACHO", step=60)
+        v_despacho = calcular_minutos(t_inicial, h_despacho)
+        
         camara_id = c3.text_input("CAMARA/ID")
+        c3.number_input("V. DESPACHO (min)", value=v_despacho, disabled=True)
+        
         h_atencion = c4.time_input("H. ATENCION", step=60)
+        v_atencion = calcular_minutos(t_inicial, h_atencion)
+        c4.number_input("V. ATENCION (min)", value=v_atencion, disabled=True)
+        
         h_cierre = c4.time_input("H. CIERE", step=60)
+        v_cierre = calcular_minutos(t_inicial, h_cierre)
+        c4.number_input("V. CIERRE (min)", value=v_cierre, disabled=True)
 
         st.subheader("📋 Incidentes")
         lista_maestra_a = ["SELECCIONAR", "ACCIDENTE DE TRÁNSITO", "ACCIDENTES", "ALERTAS"]
@@ -124,7 +137,7 @@ else:
             if not narrativa.strip(): campos_faltantes.append("Narrativa/Reporte")
             if not link_video.strip(): campos_faltantes.append("Enlace de Vídeo")
             if not camara_id.strip(): campos_faltantes.append("ID de Cámara")
-            if not referencia.strip(): campos_faltantes.append("Referencia") # Campo añadido
+            if not referencia.strip(): campos_faltantes.append("Referencia")
             if st.session_state.lat_f == "": campos_faltantes.append("Ubicación en el Mapa")
             
             if campos_faltantes:
@@ -141,7 +154,8 @@ else:
                     "CIERRE_TIPO": cierre_tipo, "CIERRE_SUBTIPO": cierre_subtipo,
                     "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5, "P6": p6,
                     "NARRATIVA": narrativa, "LINK_VIDEO": link_video,
-                    "LATITUD": str(st.session_state.lat_f), "LONGITUD": str(st.session_state.lon_f)
+                    "LATITUD": str(st.session_state.lat_f), "LONGITUD": str(st.session_state.lon_f),
+                    "VARIANZA_DESPACHO": v_despacho, "VARIANZA_ATENCION": v_atencion, "VARIANZA_CIERRE": v_cierre
                 }
                 try:
                     supabase.table("registros_c5").insert(nuevo_registro).execute()
