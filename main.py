@@ -50,6 +50,8 @@ if not st.session_state.autenticado:
     pantalla_login()
 else:
     st.title("🛡️ REGISTROS POSITIVOS DEL C.O.N - C5")
+
+    st.markdown('<p class="author-text">Creado por= Cabo 1° Elmer Rodriguez</p>', unsafe_allow_html=True)
     
     # Mapa con estilo Google Satellite Hybrid (Satélite + Calles)
     m = folium.Map(location=[8.9824, -79.5199], zoom_start=12)
