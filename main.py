@@ -4,6 +4,7 @@ import folium
 from streamlit_folium import st_folium
 from datetime import datetime, date, time
 from supabase import create_client
+import base64
 
 # --- 1. CONFIGURACIÓN SUPABASE ---
 SUPABASE_URL = "https://gqwxrxszojvphfbnkcfv.supabase.co"
@@ -13,53 +14,46 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # 2. Configuración de página
 st.set_page_config(page_title="C5 - Registro Maestro", layout="wide", initial_sidebar_state="expanded")
 
-# --- 3. CSS ESTILO "CENTRO DE MANDO GALÁCTICO" ---
-st.markdown("""
-    <style>
-    /* Fondo espacial oscuro profundo */
-    .stApp {
-        background: url('https://www.transparenttextures.com/patterns/stardust.png'), 
-                    radial-gradient(circle at center, #0a0e1a 0%, #000000 100%);
-        background-attachment: fixed;
-    }
-    
-    /* Contenedores con efecto neón y vidrio */
-    div[data-testid="stForm"], div[data-testid="stVerticalBlock"] {
-        background: rgba(10, 15, 25, 0.8) !important;
-        border: 2px solid #00d4ff !important;
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 0 30px rgba(0, 212, 255, 0.2), inset 0 0 10px rgba(0, 212, 255, 0.1);
-    }
-    
-    /* Títulos estilo Cyberpunk */
-    h1, h2, h3 {
-        color: #00d4ff !important;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        text-shadow: 0 0 15px #00d4ff;
-    }
-    
-    /* Botones Neón */
-    button {
-        background: linear-gradient(90deg, #00d4ff, #0055ff) !important;
-        color: white !important;
-        border: none !important;
-        font-weight: bold !important;
-        border-radius: 10px !important;
-        box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
-    }
-    
-    /* Inputs */
-    input, select {
-        background: rgba(0, 0, 0, 0.5) !important;
-        border: 1px solid #00d4ff !important;
-        color: #ffffff !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# --- 3. FONDO DE VIDEO A PANTALLA COMPLETA ---
+def set_video_background(video_file):
+    try:
+        with open(video_file, "rb") as f:
+            video_bytes = f.read()
+        video_b64 = base64.b64encode(video_bytes).decode()
+        st.markdown(
+            f"""
+            <style>
+            .video-background {{
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                z-index: -1; overflow: hidden;
+            }}
+            .video-background video {{
+                width: 100%; height: 100%; object-fit: cover;
+            }}
+            .stApp {{ background: transparent !important; }}
+            div[data-testid="stForm"], div[data-testid="stVerticalBlock"] {{
+                background: rgba(10, 15, 25, 0.8) !important;
+                border: 2px solid #00d4ff !important;
+                border-radius: 20px;
+                padding: 25px;
+                box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+            }}
+            h1, h2, h3 {{ color: #00d4ff !important; text-shadow: 0 0 15px #00d4ff; }}
+            </style>
+            <div class="video-background">
+                <video autoplay loop muted playsinline>
+                    <source src="data:video/mp4;base64,{video_b64}" type="video/mp4">
+                </video>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    except Exception as e:
+        st.error(f"Error cargando video: {e}")
 
-# 4. Inicializar estados
+set_video_background("Fondo Animado De La Tierra Girando Para Tu PC.mp4")
+
+# --- 4. ESTADOS ---
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
 if 'lat_f' not in st.session_state: st.session_state.lat_f = ""
 if 'lon_f' not in st.session_state: st.session_state.lon_f = ""
@@ -69,13 +63,13 @@ def calcular_minutos(t_inicio, t_evento):
     d2 = datetime.combine(date.today(), t_evento)
     return round((d2 - d1).total_seconds() / 60, 2)
 
+# --- 5. INTERFAZ DE LOGIN ---
 def pantalla_login():
     st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
     user = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")
     if st.button("Iniciar Sesión"):
-        usuarios_permitidos = {"CONC5": "12345", "ELMER RODRIGUEZ": "ELIZAharol31"}
-        if user in usuarios_permitidos and usuarios_permitidos[user] == password:
+        if user == "CONC5" and password == "12345":
             st.session_state.autenticado = True
             st.rerun()
         else:
@@ -84,18 +78,11 @@ def pantalla_login():
 if not st.session_state.autenticado:
     pantalla_login()
 else:
+    # --- 6. DASHBOARD PRINCIPAL ---
     st.title("🛡️ REGISTROS POSITIVOS DEL C.O.N - C5")
     
-    # Mapa con estilo Google Satellite Hybrid
     m = folium.Map(location=[8.9824, -79.5199], zoom_start=12)
-    folium.TileLayer(
-        tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-        attr='Google Maps Satellite',
-        name='Google Satellite Hybrid',
-        overlay=True,
-        control=True
-    ).add_to(m)
-    
+    folium.TileLayer(tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', attr='Google', name='Hybrid').add_to(m)
     m.add_child(folium.LatLngPopup())
     map_data = st_folium(m, height=400, width=1200)
 
@@ -165,39 +152,29 @@ else:
         submitted = st.form_submit_button("Guardar Registro")
         
         if submitted:
+            # --- VALIDACIÓN DE CAMPOS ---
             campos_faltantes = []
             if provincia == "SELECCIONAR": campos_faltantes.append("Provincia")
             if distrito == "SELECCIONAR": campos_faltantes.append("Distrito")
             if corregimiento == "SELECCIONAR": campos_faltantes.append("Corregimiento")
             if tipo_inc == "SELECCIONAR": campos_faltantes.append("Tipo de Incidente")
-            if not narrativa.strip(): campos_faltantes.append("Narrativa/Reporte")
-            if not link_video.strip(): campos_faltantes.append("Enlace de Vídeo")
-            if not camara_id.strip(): campos_faltantes.append("ID de Cámara")
-            if not referencia.strip(): campos_faltantes.append("Referencia")
-            if st.session_state.lat_f == "": campos_faltantes.append("Ubicación en el Mapa")
+            if not narrativa.strip(): campos_faltantes.append("Narrativa")
+            if not camara_id.strip(): campos_faltantes.append("ID Cámara")
+            if st.session_state.lat_f == "": campos_faltantes.append("Ubicación en mapa")
             
             if campos_faltantes:
-                st.error(f"❌ Falta completar: {', '.join(campos_faltantes)}")
+                st.error(f"❌ Faltan datos obligatorios: {', '.join(campos_faltantes)}")
             else:
                 nuevo_registro = {
-                    "FECHA_HORA": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "MODO": modo, "PROVINCIA": provincia, "DISTRITO": distrito, "CORREGIMIENTO": corregimiento,
-                    "REFERENCIA": referencia, "ZP_POLICIAL": zp_policial, "RECURSOS": recursos,
-                    "FECHA": str(fecha), "CENTRO_DE_MANDO": centro_mando, "UNIDAD_VV": unidad_vv,
-                    "CANAL_ENTRADA": canal, "UNIDAD_DESPACHO": unidad_despacho, "T_INICIAL": str(t_inicial),
-                    "H_DESPACHO": str(h_despacho), "CAMARA_ID": camara_id, "H_ATENCION": str(h_atencion),
-                    "H_CIERRE": str(h_cierre), "TIPO_INCIDENTE": tipo_inc, "SUBTIPO_INCIDENTE": subtipo_inc,
-                    "CIERRE_TIPO": cierre_tipo, "CIERRE_SUBTIPO": cierre_subtipo,
-                    "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5, "P6": p6,
-                    "NARRATIVA": narrativa, "LINK_VIDEO": link_video,
-                    "LATITUD": str(st.session_state.lat_f), "LONGITUD": str(st.session_state.lon_f),
-                    "VARIANZA_DESPACHO": v_despacho, "VARIANZA_ATENCION": v_atencion, "VARIANZA_CIERRE": v_cierre
+                    "REFERENCIA": referencia, "NARRATIVA": narrativa, "LINK_VIDEO": link_video,
+                    "LATITUD": str(st.session_state.lat_f), "LONGITUD": str(st.session_state.lon_f)
                 }
                 try:
                     supabase.table("registros_c5").insert(nuevo_registro).execute()
-                    st.success("✔️ Registro guardado exitosamente.")
+                    st.success("✔️ Registro guardado con éxito.")
                 except Exception as e:
-                    st.error(f"Error al guardar: {e}")
+                    st.error(f"Error: {e}")
 
     if st.sidebar.button("Cerrar Sesión"):
         st.session_state.autenticado = False
