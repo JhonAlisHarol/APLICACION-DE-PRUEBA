@@ -13,18 +13,53 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # 2. Configuración de página
 st.set_page_config(page_title="C5 - Registro Maestro", layout="wide", initial_sidebar_state="expanded")
 
-# --- CSS PARA ESTILOS ---
+# --- 3. CSS ESTILO "CENTRO DE MANDO GALÁCTICO" ---
 st.markdown("""
     <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .stApp { background-color: #0a0e17; }
-    h1, h2, h3, span, p, label { color: #ffffff !important; }
+    /* Fondo espacial oscuro profundo */
+    .stApp {
+        background: url('https://www.transparenttextures.com/patterns/stardust.png'), 
+                    radial-gradient(circle at center, #0a0e1a 0%, #000000 100%);
+        background-attachment: fixed;
+    }
+    
+    /* Contenedores con efecto neón y vidrio */
+    div[data-testid="stForm"], div[data-testid="stVerticalBlock"] {
+        background: rgba(10, 15, 25, 0.8) !important;
+        border: 2px solid #00d4ff !important;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.2), inset 0 0 10px rgba(0, 212, 255, 0.1);
+    }
+    
+    /* Títulos estilo Cyberpunk */
+    h1, h2, h3 {
+        color: #00d4ff !important;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        text-shadow: 0 0 15px #00d4ff;
+    }
+    
+    /* Botones Neón */
+    button {
+        background: linear-gradient(90deg, #00d4ff, #0055ff) !important;
+        color: white !important;
+        border: none !important;
+        font-weight: bold !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+    }
+    
+    /* Inputs */
+    input, select {
+        background: rgba(0, 0, 0, 0.5) !important;
+        border: 1px solid #00d4ff !important;
+        color: #ffffff !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Inicializar estados
+# 4. Inicializar estados
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
 if 'lat_f' not in st.session_state: st.session_state.lat_f = ""
 if 'lon_f' not in st.session_state: st.session_state.lon_f = ""
@@ -50,10 +85,8 @@ if not st.session_state.autenticado:
     pantalla_login()
 else:
     st.title("🛡️ REGISTROS POSITIVOS DEL C.O.N - C5")
-
-    st.markdown('<p class="author-text">Creado por= Cabo 1° Elmer Rodriguez</p>', unsafe_allow_html=True)
     
-    # Mapa con estilo Google Satellite Hybrid (Satélite + Calles)
+    # Mapa con estilo Google Satellite Hybrid
     m = folium.Map(location=[8.9824, -79.5199], zoom_start=12)
     folium.TileLayer(
         tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
@@ -98,17 +131,13 @@ else:
         canal = c2.selectbox("CANAL DE ENTRADA", ["SELECCIONAR", "CLL-104", "VIDEO-VIGILANCIA"])
         unidad_despacho = c2.selectbox("UNIDAD DE DESPACHO", ["SELECCIONAR", "ISMAEL PEÑA"])
         t_inicial = c3.time_input("T. INICIAL", step=60)
-        
         h_despacho = c3.time_input("H. DESPACHO", step=60)
         v_despacho = calcular_minutos(t_inicial, h_despacho)
-        
         camara_id = c3.text_input("CAMARA/ID")
         c3.number_input("V. DESPACHO (min)", value=v_despacho, disabled=True)
-        
         h_atencion = c4.time_input("H. ATENCION", step=60)
         v_atencion = calcular_minutos(t_inicial, h_atencion)
         c4.number_input("V. ATENCION (min)", value=v_atencion, disabled=True)
-        
         h_cierre = c4.time_input("H. CIERE", step=60)
         v_cierre = calcular_minutos(t_inicial, h_cierre)
         c4.number_input("V. CIERRE (min)", value=v_cierre, disabled=True)
@@ -133,7 +162,6 @@ else:
 
         narrativa = st.text_input("REPORTE/NARRATIVA")
         link_video = st.text_input("ENLACE DE VÍDEO")
-        
         submitted = st.form_submit_button("Guardar Registro")
         
         if submitted:
