@@ -51,9 +51,16 @@ if not st.session_state.autenticado:
 else:
     st.title("🛡️ REGISTROS POSITIVOS DEL C.O.N - C5")
     
-    # Mapa
-    m = folium.Map(location=[8.9824, -79.5199], zoom_start=10, 
-                   tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", attr="Esri")
+    # Mapa con estilo Google Satellite Hybrid (Satélite + Calles)
+    m = folium.Map(location=[8.9824, -79.5199], zoom_start=12)
+    folium.TileLayer(
+        tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+        attr='Google Maps Satellite',
+        name='Google Satellite Hybrid',
+        overlay=True,
+        control=True
+    ).add_to(m)
+    
     m.add_child(folium.LatLngPopup())
     map_data = st_folium(m, height=400, width=1200)
 
@@ -90,7 +97,6 @@ else:
         unidad_despacho = c2.selectbox("UNIDAD DE DESPACHO", ["SELECCIONAR", "ISMAEL PEÑA"])
         t_inicial = c3.time_input("T. INICIAL", step=60)
         
-        # Tiempos de cálculo
         h_despacho = c3.time_input("H. DESPACHO", step=60)
         v_despacho = calcular_minutos(t_inicial, h_despacho)
         
