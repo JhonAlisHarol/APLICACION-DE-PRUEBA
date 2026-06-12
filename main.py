@@ -13,6 +13,13 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # 2. Configuración de página
 st.set_page_config(page_title="C5 - Registro Maestro", layout="wide", initial_sidebar_state="expanded")
+st.markdown("""
+        <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        </style>
+    """, unsafe_allow_html=True)
 
 # --- 3. FONDO DE VIDEO A PANTALLA COMPLETA ---
 def set_video_background(video_file):
