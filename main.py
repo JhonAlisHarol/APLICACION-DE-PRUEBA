@@ -76,8 +76,8 @@ def pantalla_login():
     # Base de Datos Local de Usuarios
     Usuarios_Permitidos = {
         "CONC5": "12345678",
-        "ALISJHON2": "199430"
-        "CORCOL": "CORCOLC2"
+        "ALISJHON": "199430",
+        "CORCOL": "CORCOL-C2"
     } 
             
     user = st.text_input("Usuario")
