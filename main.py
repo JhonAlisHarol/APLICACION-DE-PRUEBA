@@ -95,6 +95,7 @@ def pantalla_login():
 
 if not st.session_state.autenticado:
     pantalla_login()
+        
 else:
     # --- 6. DASHBOARD PRINCIPAL ---
     st.title("🛡️ REGISTROS POSITIVOS DEL C.O.N - C5")
