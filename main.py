@@ -73,6 +73,7 @@ def calcular_minutos(t_inicio, t_evento):
 # --- 5. INTERFAZ DE LOGIN ---
 def pantalla_login():
     st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
+        
     # Base de Datos Local de Usuarios
     Usuarios_Permitidos = {
         "CONC5": "12345678",
@@ -95,7 +96,6 @@ def pantalla_login():
 
 if not st.session_state.autenticado:
     pantalla_login()
-        
 else:
     # --- 6. DASHBOARD PRINCIPAL ---
     st.title("🛡️ REGISTROS POSITIVOS DEL C.O.N - C5")
