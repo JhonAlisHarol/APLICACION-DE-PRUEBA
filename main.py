@@ -157,7 +157,6 @@ else:
 
         cierre_tipo, cierre_subtipo = "N/A", "N/A"
         p1, p2, p3, p4, p5, p6 = "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
-        
         if modo == "POSITIVO":
             c_cierre1, c_cierre2 = st.columns(2)
             cierre_tipo = c_cierre1.selectbox("CIERRE TIPO", lista_maestra_a)
@@ -171,23 +170,39 @@ else:
         submitted = st.form_submit_button("Guardar Registro")
         
         if submitted:
-            # --- VALIDACIÓN DE CAMPOS ---
+            # --- VALIDACIÓN ESTRICTA ---
             campos_faltantes = []
             if provincia == "SELECCIONAR": campos_faltantes.append("Provincia")
             if distrito == "SELECCIONAR": campos_faltantes.append("Distrito")
             if corregimiento == "SELECCIONAR": campos_faltantes.append("Corregimiento")
+            if zp_policial == "SELECCIONAR": campos_faltantes.append("ZP Policial")
+            if recursos == "SELECCIONAR": campos_faltantes.append("Recursos")
+            if centro_mando == "SELECCIONAR": campos_faltantes.append("Centro de Mando")
+            if unidad_vv == "SELECCIONAR": campos_faltantes.append("Unidad VV/104")
+            if canal == "SELECCIONAR": campos_faltantes.append("Canal de Entrada")
+            if unidad_despacho == "SELECCIONAR": campos_faltantes.append("Unidad de Despacho")
             if tipo_inc == "SELECCIONAR": campos_faltantes.append("Tipo de Incidente")
-            if not narrativa.strip(): campos_faltantes.append("Narrativa")
+            if subtipo_inc == "SELECCIONAR": campos_faltantes.append("Subtipo de Incidente")
             if not camara_id.strip(): campos_faltantes.append("ID Cámara")
-            if st.session_state.lat_f == "": campos_faltantes.append("Ubicación en mapa")
+            if not narrativa.strip(): campos_faltantes.append("Narrativa")
+            if not link_video.strip(): campos_faltantes.append("Enlace de Video")
+            if not st.session_state.lat_f: campos_faltantes.append("Ubicación en el Mapa")
             
             if campos_faltantes:
                 st.error(f"❌ Faltan datos obligatorios: {', '.join(campos_faltantes)}")
             else:
                 nuevo_registro = {
                     "MODO": modo, "PROVINCIA": provincia, "DISTRITO": distrito, "CORREGIMIENTO": corregimiento,
-                    "REFERENCIA": referencia, "NARRATIVA": narrativa, "LINK_VIDEO": link_video,
-                    "LATITUD": str(st.session_state.lat_f), "LONGITUD": str(st.session_state.lon_f)
+                    "REFERENCIA": referencia, "ZP_POLICIAL": zp_policial, "RECURSOS": recursos,
+                    "FECHA": str(fecha), "FECHA_HORA": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "CENTRO_DE_MANDO": centro_mando, "UNIDAD_VV": unidad_vv, "CANAL_ENTRADA": canal,
+                    "UNIDAD_DESPACHO": unidad_despacho, "T_INICIAL": str(t_inicial), "H_DESPACHO": str(h_despacho),
+                    "CAMARA_ID": camara_id, "H_ATENCION": str(h_atencion), "H_CIERRE": str(h_cierre),
+                    "TIPO_INCIDENTE": tipo_inc, "SUBTIPO_INCIDENTE": subtipo_inc, "CIERRE_TIPO": cierre_tipo,
+                    "CIERRE_SUBTIPO": cierre_subtipo, "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5, "P6": p6,
+                    "NARRATIVA": narrativa, "LINK_VIDEO": link_video, "LATITUD": str(st.session_state.lat_f),
+                    "LONGITUD": str(st.session_state.lon_f), "VARIANZA_DESPACHO": v_despacho,
+                    "VARIANZA_ATENCION": v_atencion, "VARIANZA_CIERRE": v_cierre
                 }
                 try:
                     supabase.table("registros_c5").insert(nuevo_registro).execute()
@@ -195,6 +210,8 @@ else:
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-    if st.sidebar.button("Cerrar Sesión"):
-        st.session_state.autenticado = False
-        st.rerun()
+    # BOTÓN FUERA DEL FORM
+    with st.sidebar:
+        if st.button("Cerrar Sesión"):
+            st.session_state.autenticado = False
+            st.rerun()
