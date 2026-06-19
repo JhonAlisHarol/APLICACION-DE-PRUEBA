@@ -73,23 +73,23 @@ def calcular_minutos(t_inicio, t_evento):
 # --- 5. INTERFAZ DE LOGIN ---
 def pantalla_login():
     st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
-        
-    # Base de Datos Local de Usuarios
-    Usuarios_Permitidos = {
-        "CONC5": "12345678",
-        "ALISJHON": "199430",
-        "CORCOL": "CORCOL-C2"
-    } 
-            
+    
+    # Base de datos local de usuarios
+    usuarios_permitidos = {
+        "CONC5": "12345",
+        "ALISJHON": "199431",
+        "OPERADOR_C5": "operador2026"
+    }
+
     user = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")
-        
+
     if st.button("Iniciar Sesión"):
-        # Verificamos si el usuario existe y si la contraceña coincide    
-        if user in usuarios_permitidos and usuarios_permitidos[user] == password:    
+        # Verificamos si el usuario existe y si la contraseña coincide
+        if user in usuarios_permitidos and usuarios_permitidos[user] == password:
             st.session_state.autenticado = True
-            st.session_state.usuario_actual = user # Util para saber quien inicio sesion
-            st.success(f"Bienvenido {user}")    
+            st.session_state.usuario_actual = user  # Útil para saber quién inició sesión
+            st.success(f"Bienvenido {user}")
             st.rerun()
         else:
             st.error("Usuario o contraseña incorrectos")
