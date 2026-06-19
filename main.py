@@ -78,6 +78,7 @@ def pantalla_login():
         "CONC5": "12345678",
         "ALISJHON2": "199430"
         "CORCOL": "CORCOLC2"
+    } 
             
     user = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")
