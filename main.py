@@ -235,7 +235,7 @@ else:
                 try:
                     supabase.table("registros_c5").insert(nuevo_registro, returning='minimal').execute()
                     st.success("✔️ Registro guardado con éxito.")
-                    st.rerun()    
+                       
                 except Exception as e:
                     st.error(f"Error: {e}")
 
