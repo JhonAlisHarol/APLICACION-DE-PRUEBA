@@ -73,9 +73,9 @@ def calcular_minutos(t_inicio, t_evento):
 # --- 5. INTERFAZ DE LOGIN ---
 def pantalla_login():
     st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
-        
-    st.markdown('<p class="author">Desarrollado por: [Cabo 1° Elmer Rodriguez]</p>', unsafe_allow_html=True)    
     
+    st.markdown('<p class="author">Desarrollado por: [Cabo1° Elmer Rodriguez]</p>', unsafe_allow_html=True)
+
     # Base de datos local de usuarios
     usuarios_permitidos = {
         "CONC5": "12345",
@@ -159,13 +159,28 @@ else:
 
         cierre_tipo, cierre_subtipo = "N/A", "N/A"
         p1, p2, p3, p4, p5, p6 = "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+        # --- BLOQUE DE POSITIVOS ---
         if modo == "POSITIVO":
             c_cierre1, c_cierre2 = st.columns(2)
             cierre_tipo = c_cierre1.selectbox("CIERRE TIPO", lista_maestra_a)
             cierre_subtipo = c_cierre2.selectbox("CIERRE SUBTIPO", lista_maestra_b)
-            cols = st.columns(6)
+            
+            # Definimos la lista una sola vez para los 6 campos
             lista_pos = ["SELECCIONAR", "APOYO AL CIUDADANO", "ARTICULOS RECUPERADOS"]
-            p1, p2, p3, p4, p5, p6 = cols[0].selectbox("P1", lista_pos), cols[1].selectbox("P2", lista_pos), cols[2].selectbox("P3", lista_pos), cols[3].selectbox("P4", lista_pos), cols[4].selectbox("P5", lista_pos), cols[5].selectbox("P6", lista_pos)
+            
+            st.write("Selección de Categorías:")
+            
+            # Fila 1: P1, P2, P3
+            cols_top = st.columns(3)
+            p1 = cols_top[0].selectbox("P1", lista_pos)
+            p2 = cols_top[1].selectbox("P2", lista_pos)
+            p3 = cols_top[2].selectbox("P3", lista_pos)
+            
+            # Fila 2: P4, P5, P6
+            cols_bottom = st.columns(3)
+            p4 = cols_bottom[0].selectbox("P4", lista_pos)
+            p5 = cols_bottom[1].selectbox("P5", lista_pos)
+            p6 = cols_bottom[2].selectbox("P6", lista_pos)
 
         narrativa = st.text_input("REPORTE/NARRATIVA")
         link_video = st.text_input("ENLACE DE VÍDEO")
@@ -223,8 +238,19 @@ else:
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-    # BOTÓN FUERA DEL FORM
+   # --- 7. BARRA LATERAL (Sidebar) ---
     with st.sidebar:
+        # Mostrar usuario
+        st.write(f"👤 Operador: **{st.session_state.usuario_actual}**")
+        
+        # Reloj
+        st.subheader("🕒 Hora Actual")
+        hora_actual = datetime.now().strftime("%H:%M:%S")
+        st.metric(label="", value=hora_actual)
+        
+        st.divider()
+        
+        # Botón de Cerrar Sesión
         if st.button("Cerrar Sesión"):
             st.session_state.autenticado = False
             st.rerun()
