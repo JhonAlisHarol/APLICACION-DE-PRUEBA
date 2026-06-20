@@ -233,7 +233,7 @@ else:
                     "VARIANZA_ATENCION": v_atencion, "VARIANZA_CIERRE": v_cierre
                 }
                 try:
-                    supabase.table("registros_c5").insert(nuevo_registro).execute()
+                    supabase.table("registros_c5").insert(nuevo_registro, returning='minimal').execute()
                     st.success("✔️ Registro guardado con éxito.")
                 except Exception as e:
                     st.error(f"Error: {e}")
