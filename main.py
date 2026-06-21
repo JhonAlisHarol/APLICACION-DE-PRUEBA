@@ -165,8 +165,8 @@ else:
         if modo == "PREVENTIVO":
             st.subheader("🛡️ Detalles Preventivos")
             col_v, col_p = st.columns(2)
-            vehiculos_verificados = col_v.number_input("Vehiculos Verificados", min_value=0, step=1)
-            personas_verificadas = col_p.number_input("Personas Verificadas", min_value=0, step=1)
+            vehiculos_verificados = col_v.number_input("VEHICULOS VERIFICADOS", min_value=0, step=1)
+            personas_verificadas = col_p.number_input("PERSONAS VERIFICADAS", min_value=0, step=1)
         # ------------------------------
 
         cierre_tipo, cierre_subtipo = "N/A", "N/A"
