@@ -218,7 +218,7 @@ else:
             if not st.session_state.lat_f: campos_faltantes.append("Ubicación en el Mapa")
 
             # 1. VALIDACION DE MODO PREVENTIVO
-            if mod == "PREVENTIVO":
+            if modo == "PREVENTIVO":
                 if vehiculos_verificados <=0:
                     campos_faltantes.append("VEHICULOS VERIFICADOS")
                 if personas_verificadas <= 0:
