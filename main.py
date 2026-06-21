@@ -106,7 +106,7 @@ else:
     m = folium.Map(location=[8.9824, -79.5199], zoom_start=12)
     folium.TileLayer(tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', attr='Google', name='Hybrid').add_to(m)
     m.add_child(folium.LatLngPopup())
-    map_data = st_folium(m, height=400, width=1200)
+    map_data = st_folium(m, height=600, width=1400)
 
     if map_data and map_data.get('last_clicked'):
         st.session_state.lat_f = map_data['last_clicked']['lat']
