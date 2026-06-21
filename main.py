@@ -246,25 +246,33 @@ else:
         st.write(f"👤 Operador: **{st.session_state.usuario_actual}**")
         
         # --- BLOQUE FINAL: RELOJ AJUSTADO ---
-import pytz
-from datetime import datetime
+        import pytz
+        from datetime import datetime
 
-# Definir la zona horaria de Panamá
-zona_panama = pytz.timezone('America/Panama')
+        # Definir la zona horaria de Panamá
+        zona_panama = pytz.timezone('America/Panama')
 
-# Obtener la hora actual ajustada
-hora_panama = datetime.now(zona_panama).strftime("%H:%M:%S")
+        # Obtener la hora actual ajustada
+        hora_panama = datetime.now(zona_panama).strftime("%H:%M:%S")
 
-# Mostrar el reloj (Asegúrate de mantener este bloque donde estaba el anterior)
-st.subheader("🕒 Hora Actual")
-st.metric(label="", value=hora_panama)
+        # Mostrar el reloj (Asegúrate de mantener este bloque donde estaba el anterior)
+        st.subheader("🕒 Hora Actual")
+        st.metric(label="", value=hora_panama)
 
-st.divider()
+        st.divider()
 
-# --- REFRESCAR AUTOMÁTICAMENTE (Opcional, para que el reloj avance solo) ---
-import time
-time.sleep(1)
-st.rerun()
+        # Sustituye tus líneas 264-267 por esto:
+        import time
+
+        # Crea un contenedor específico para el reloj
+        reloj_placeholder = st.empty()
+
+        # Esto actualiza solo el reloj, sin recargar todo el formulario
+        for seconds in range(60): # Se actualiza por 60 segundos antes de recargar
+            hora_panama = datetime.now(zona_panama).strftime("%H:%M:%S")
+            reloj_placeholder.metric(label="🕒 Hora Actual", value=hora_panama)
+            time.sleep(1)
+        st.rerun() # Esto recarga el ciclo para mantenerlo vivo
         
         # Botón de Cerrar Sesión
         if st.button("Cerrar Sesión"):
