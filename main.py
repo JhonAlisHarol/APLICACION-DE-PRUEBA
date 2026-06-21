@@ -255,10 +255,6 @@ else:
         # Obtener la hora actual ajustada
         hora_panama = datetime.now(zona_panama).strftime("%H:%M:%S")
 
-        # Mostrar el reloj (Asegúrate de mantener este bloque donde estaba el anterior)
-        st.subheader("🕒 Hora Actual")
-        st.metric(label="", value=hora_panama)
-
         st.divider()
 
         # Sustituye tus líneas 264-267 por esto:
