@@ -270,7 +270,7 @@ else:
             time.sleep(1)
         st.rerun() # Esto recarga el ciclo para mantenerlo vivo
         
-     # Botón de Cerrar Sesión
-     if st.button("Cerrar Sesión"):
+        # Botón de Cerrar Sesión
+        if st.button("Cerrar Sesión"):
                 st.session_state.autenticado = False
                 st.rerun()
