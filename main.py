@@ -217,7 +217,14 @@ else:
             if not link_video.strip(): campos_faltantes.append("Enlace de Video")
             if not st.session_state.lat_f: campos_faltantes.append("Ubicación en el Mapa")
 
-            # --- VALIDACIÓN ADICIONAL PARA MODO POSITIVO ---
+            # 1. VALIDACION DE MODO PREVENTIVO
+            if mod == "PREVENTIVO".
+                if vehiculos_verificados <=0:
+                    campos_faltantes.append"VEHICULOS VERIFICADOS")
+                if personas_verificadas <= 0:
+                    campos_faltantes.append("PERSONAS VERIFICADAS")   
+
+            # 2. VALIDACIÓN DE MODO POSITIVO ---
             if modo == "POSITIVO":
                 if cierre_tipo == "SELECCIONAR": campos_faltantes.append("Cierre Tipo")
                 if cierre_subtipo == "SELECCIONAR": campos_faltantes.append("Cierre Subtipo")
@@ -243,6 +250,8 @@ else:
                     "NARRATIVA": narrativa, "LINK_VIDEO": link_video, "LATITUD": str(st.session_state.lat_f),
                     "LONGITUD": str(st.session_state.lon_f), "VARIANZA_DESPACHO": v_despacho,
                     "VARIANZA_ATENCION": v_atencion, "VARIANZA_CIERRE": v_cierre
+                    "VEHICULOS_VERIFICADOS": vehiculos_verificados,
+                    "PERSONAS_VERIFICADAS": personas_verificadas
                 }
                 try:
                     supabase.table("registros_c5").insert(nuevo_registro, returning='minimal').execute()
