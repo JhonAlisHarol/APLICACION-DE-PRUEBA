@@ -162,7 +162,7 @@ else:
         vehiculos_verificados = 0
         personas_verificadas = 0
 
-        if modo == "PREVENTIVO".
+        if modo == "PREVENTIVO":
             st.subheader("🛡️ Detalles Preventivos")
             col_v, col_p = st.columns(2)
             vehiculos_verificados = col_v.number_input("Vehiculos Verificados", min_value=0, step=1)
