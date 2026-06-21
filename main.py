@@ -80,7 +80,7 @@ def pantalla_login():
     usuarios_permitidos = {
         "CONC5": "12345",
         "ALISJHON": "199431",
-        "OPERADOR_C5": "operador2026"
+        "OPERADOR_C5": "operador2026", "DAMIAN NAVARRO": "DAMIAN84"
     }
 
     user = st.text_input("Usuario")
