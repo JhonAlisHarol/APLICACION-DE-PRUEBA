@@ -276,5 +276,3 @@ with st.sidebar:
             st.session_state.autenticado = False
             st.session_state.usuario_actual = None 
             st.rerun()
-    else:
-        st.info("Por favor, inicie sesión.")
