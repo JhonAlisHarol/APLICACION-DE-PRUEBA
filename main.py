@@ -272,5 +272,5 @@ else:
         
      # Botón de Cerrar Sesión
      if st.button("Cerrar Sesión"):
-        st.session_state.autenticado = False
-        st.rerun()
+                st.session_state.autenticado = False
+                st.rerun()
