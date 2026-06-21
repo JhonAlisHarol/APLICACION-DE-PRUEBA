@@ -241,36 +241,33 @@ else:
                     st.error(f"Error: {e}")
 
    # --- 7. BARRA LATERAL (Sidebar) ---
-    with st.sidebar:
-        # Mostrar usuario
-        st.write(f"👤 Operador: **{st.session_state.usuario_actual}**")
-        
-        # --- BLOQUE FINAL: RELOJ AJUSTADO ---
-        import pytz
-        from datetime import datetime
+with st.sidebar:
+    # 1. Mostrar usuario
+    st.write(f"👤 Operador: **{st.session_state.usuario_actual}**")
+    
+    # 2. Reloj (Contenedor vacío)
+    st.subheader("🕒 Hora Actual")
+    reloj_placeholder = st.empty()
+    
+    # 3. Botón de Cerrar Sesión (Ahora está FUERA de cualquier bucle o condición de tiempo)
+    # Esto asegura que el botón siempre se pinte en la pantalla
+    st.divider()
+    if st.button("Cerrar Sesión"):
+        st.session_state.autenticado = False
+        st.rerun()
 
-        # Definir la zona horaria de Panamá
-        zona_panama = pytz.timezone('America/Panama')
-
-        # Obtener la hora actual ajustada
-        hora_panama = datetime.now(zona_panama).strftime("%H:%M:%S")
-
-        st.divider()
-
-        # Sustituye tus líneas 264-267 por esto:
-        import time
-
-        # Crea un contenedor específico para el reloj
-        reloj_placeholder = st.empty()
-
-        # Esto actualiza solo el reloj, sin recargar todo el formulario
-        for seconds in range(60): # Se actualiza por 60 segundos antes de recargar
-            hora_panama = datetime.now(zona_panama).strftime("%H:%M:%S")
-            reloj_placeholder.metric(label="🕒 Hora Actual", value=hora_panama)
-            time.sleep(1)
-        st.rerun() # Esto recarga el ciclo para mantenerlo vivo
-        
-        # Botón de Cerrar Sesión
-        if st.button("Cerrar Sesión"):
-                st.session_state.autenticado = False
-                st.rerun()
+    # 4. Lógica de tiempo (Cálculo y actualización)
+    # Importaciones necesarias (asegúrate de tenerlas arriba en el main.py también)
+    import pytz
+    import time
+    from datetime import datetime
+    
+    zona_panama = pytz.timezone('America/Panama')
+    
+    # Actualizar la hora en el contenedor
+    hora_panama = datetime.now(zona_panama).strftime("%H:%M:%S")
+    reloj_placeholder.metric(label="", value=hora_panama)
+    
+    # Refresco para el reloj (esto recarga el sidebar cada segundo)
+    time.sleep(1)
+    st.rerun()
