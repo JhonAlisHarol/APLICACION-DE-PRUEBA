@@ -220,7 +220,7 @@ else:
             # 1. VALIDACION DE MODO PREVENTIVO
             if mod == "PREVENTIVO".
                 if vehiculos_verificados <=0:
-                    campos_faltantes.append"VEHICULOS VERIFICADOS")
+                    campos_faltantes.append("VEHICULOS VERIFICADOS")
                 if personas_verificadas <= 0:
                     campos_faltantes.append("PERSONAS VERIFICADAS")   
 
