@@ -250,8 +250,7 @@ else:
                     "NARRATIVA": narrativa, "LINK_VIDEO": link_video, "LATITUD": str(st.session_state.lat_f),
                     "LONGITUD": str(st.session_state.lon_f), "VARIANZA_DESPACHO": v_despacho,
                     "VARIANZA_ATENCION": v_atencion, "VARIANZA_CIERRE": v_cierre
-                    "VEHICULOS_VERIFICADOS": vehiculos_verificados,
-                    "PERSONAS_VERIFICADAS": personas_verificadas
+                    "VEHICULOS_VERIFICADOS": vehiculos_verificados, "PERSONAS_VERIFICADAS": personas_verificadas
                 }
                 try:
                     supabase.table("registros_c5").insert(nuevo_registro, returning='minimal').execute()
