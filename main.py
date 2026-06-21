@@ -158,6 +158,17 @@ else:
         tipo_inc = c8.selectbox("TIPO DE INCIDENTES", lista_maestra_a)
         subtipo_inc = c9.selectbox("SUBTIPO DE INCIDENTES", lista_maestra_b)
 
+        # --- AQUI VA EL BLOQUE NUEVO ---
+        vehiculos_verificados = 0
+        personas_verificadas = 0
+
+        if modo == "PREVENTIVO".
+            st.subheader("🛡️ Detalles Preventivos")
+            col_v, col_p = st.columns(2)
+            vehiculos_verificados = col_v.number_input("Vehiculos Verificados", min_value=0, step=1)
+            personas_verificadas = col_p.number_input("Personas Verificadas", min_value=0, step=1)
+        # ------------------------------
+
         cierre_tipo, cierre_subtipo = "N/A", "N/A"
         p1, p2, p3, p4, p5, p6 = "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
         # --- BLOQUE DE POSITIVOS ---
