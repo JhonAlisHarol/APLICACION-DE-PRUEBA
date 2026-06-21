@@ -245,11 +245,18 @@ else:
         # Mostrar usuario
         st.write(f"👤 Operador: **{st.session_state.usuario_actual}**")
         
-        # Reloj
+        # --- RELOJ AJUSTADO ---
         st.subheader("🕒 Hora Actual")
-        hora_actual = datetime.now().strftime("%H:%M:%S")
-        st.metric(label="", value=hora_actual)
-        
+
+        # Definir la zona horaria de Panamá
+        zona_panama = pytz.timezone('America/Panama')
+
+        # Obtener la hora actual ajustada
+        hora_panama = datetime.now(zona_panama).strftime("%H:%M:%S")
+
+        # Mostrar el reloj
+        st.metric(label="", value=hora_panama)
+
         st.divider()
         
         # Botón de Cerrar Sesión
