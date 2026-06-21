@@ -249,8 +249,9 @@ else:
                     "CIERRE_SUBTIPO": cierre_subtipo, "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5, "P6": p6,
                     "NARRATIVA": narrativa, "LINK_VIDEO": link_video, "LATITUD": str(st.session_state.lat_f),
                     "LONGITUD": str(st.session_state.lon_f), "VARIANZA_DESPACHO": v_despacho,
-                    "VARIANZA_ATENCION": v_atencion, "VARIANZA_CIERRE": v_cierre
-                    "VEHICULOS_VERIFICADOS": vehiculos_verificados, "PERSONAS_VERIFICADAS": personas_verificadas
+                    "VARIANZA_ATENCION": v_atencion, "VARIANZA_CIERRE": v_cierre,
+                    "VEHICULOS_VERIFICADOS": vehiculos_verificados,
+                    "PERSONAS_VERIFICADAS": personas_verificadas
                 }
                 try:
                     supabase.table("registros_c5").insert(nuevo_registro, returning='minimal').execute()
