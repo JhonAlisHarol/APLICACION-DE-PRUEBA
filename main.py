@@ -242,30 +242,39 @@ else:
 
    # --- 7. BARRA LATERAL (Sidebar) ---
 with st.sidebar:
-    # Verificamos si el usuario está autenticado antes de mostrar nada
+    # 1. Mostrar usuario
     if st.session_state.get("autenticado", False):
-        # 1. Mostrar usuario
         st.write(f"👤 Operador: **{st.session_state.get('usuario_actual', 'Usuario')}**")
         
-        # 2. Reloj (Se muestra la hora al cargar)
+        # 2. Reloj en tiempo real
         st.subheader("🕒 Hora Actual")
+        reloj_placeholder = st.empty()
         
-        import pytz
-        from datetime import datetime
+        # Inyectamos un pequeño script de JavaScript para que el reloj avance solo
+        # sin recargar la página completa.
+        import streamlit.components.v1 as components
         
-        zona_panama = pytz.timezone('America/Panama')
-        hora_panama = datetime.now(zona_panama).strftime("%H:%M:%S")
+        components.html(
+            """
+            <div id="reloj" style="font-size: 24px; font-weight: bold; color: #00f2ff;"></div>
+            <script>
+                function actualizarReloj() {
+                    const ahora = new Date();
+                    const opciones = { timeZone: 'America/Panama', hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' };
+                    document.getElementById('reloj').innerText = ahora.toLocaleTimeString('es-PA', opciones);
+                }
+                setInterval(actualizarReloj, 1000);
+                actualizarReloj();
+            </script>
+            """,
+            height=40
+        )
         
-        st.metric(label="", value=hora_panama)
-        
-        # 3. Botón de Cerrar Sesión
-        # Ahora es estable y no causa parpadeos
+        # 3. Botón de Cerrar Sesión (Ahora es totalmente estable)
         st.divider()
         if st.button("Cerrar Sesión"):
             st.session_state.autenticado = False
-            # Opcional: limpiar el usuario también
             st.session_state.usuario_actual = None 
             st.rerun()
     else:
-        # Mensaje para cuando no hay sesión iniciada
-        st.info("Por favor, inicie sesión para acceder al sistema.")
+        st.info("Por favor, inicie sesión.")
