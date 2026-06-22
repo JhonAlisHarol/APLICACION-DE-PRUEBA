@@ -265,7 +265,7 @@ with st.sidebar:
         
         components.html(
             """
-            <div id="reloj" style="font-size: 24px; font-weight: bold; color: #00f2ff;"></div>
+            <div id="reloj" style="font-size: 24px; font-weight: bold; color: #bc13fe;"></div>
             <script>
                 function actualizarReloj() {
                     const ahora = new Date();
