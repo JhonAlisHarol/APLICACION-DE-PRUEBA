@@ -153,8 +153,8 @@ else:
         c4.number_input("V. CIERRE (min)", value=v_cierre, disabled=True)
 
         st.subheader("📋 Incidentes")
-        lista_maestra_a = ["SELECCIONAR", "ACCIDENTE DE TRÁNSITO", "ACCIDENTES", "ALERTAS"]
-        lista_maestra_b = ["SELECCIONAR", "A LOCAL COMERCIAL", "A RESIDENCIA", "A PROPIEDAD"]
+        lista_maestra_a = ["SELECCIONAR", "ACCIDENTE DE TRANSITO", "ACCIDENTES", "ALERTAS"]
+        lista_maestra_b = ["SELECCIONAR", "PERSONAS EN ACTITUD INUSUAL", "VEHICULO SOSPECHOSO", "COLISION MENOR"]
         c8, c9 = st.columns(2)
         tipo_inc = c8.selectbox("TIPO DE INCIDENTES", lista_maestra_a)
         subtipo_inc = c9.selectbox("SUBTIPO DE INCIDENTES", lista_maestra_b)
