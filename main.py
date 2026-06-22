@@ -216,16 +216,9 @@ else:
             if not camara_id.strip(): campos_faltantes.append("ID Cámara")
             if not narrativa.strip(): campos_faltantes.append("Narrativa")
             if not link_video.strip(): campos_faltantes.append("Enlace de Video")
-            if not st.session_state.lat_f: campos_faltantes.append("Ubicación en el Mapa")
+            if not st.session_state.lat_f: campos_faltantes.append("Ubicación en el Mapa") 
 
-            # 1. VALIDACION DE MODO PREVENTIVO
-            if modo == "PREVENTIVO":
-                if vehiculos_verificados <=0:
-                    campos_faltantes.append("VEHICULOS VERIFICADOS")
-                if personas_verificadas <= 0:
-                    campos_faltantes.append("PERSONAS VERIFICADAS")   
-
-            # 2. VALIDACIÓN DE MODO POSITIVO ---
+            # . VALIDACIÓN DE MODO POSITIVO ---
             if modo == "POSITIVO":
                 if cierre_tipo == "SELECCIONAR": campos_faltantes.append("Cierre Tipo")
                 if cierre_subtipo == "SELECCIONAR": campos_faltantes.append("Cierre Subtipo")
