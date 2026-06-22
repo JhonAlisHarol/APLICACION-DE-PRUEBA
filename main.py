@@ -179,7 +179,7 @@ else:
             cierre_subtipo = c_cierre2.selectbox("CIERRE SUBTIPO", lista_maestra_b)
             
             # Definimos la lista una sola vez para los 6 campos
-            lista_pos = ["SELECCIONAR", "APOYO AL CIUDADANO", "ARTICULOS RECUPERADOS"]
+            lista_pos = ["SELECCIONAR", "APOYO AL CIUDADANO", "CIUDADANO APREHENDIDO POR OFICIO DE CONDUCCIÓN", "CIUDADANO APREHENDIDO POR OFICIO DE CAPTURA"]
             
             st.write("Selección de Categorías:")
             
