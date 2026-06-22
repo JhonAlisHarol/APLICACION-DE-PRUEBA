@@ -75,7 +75,7 @@ def calcular_minutos(t_inicio, t_evento):
 def pantalla_login():
     st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
     
-    st.markdown('<p class="author">Desarrollado por: [CABO 1° ELMER RODRIGUEZ]</p>', unsafe_allow_html=True)
+    st.markdown('<p class="author">DESARROLLADO POR: [CABO 1° ELMER RODRIGUEZ]</p>', unsafe_allow_html=True)
 
     # Base de datos local de usuarios
     usuarios_permitidos = {
@@ -101,7 +101,7 @@ if not st.session_state.autenticado:
     pantalla_login()
 else:
     # --- 6. DASHBOARD PRINCIPAL ---
-    st.markdown('<p class="author">Desarrollado por: [CABO 1° ELMER RODRIGUEZ]</p>', unsafe_allow_html=True)    
+    st.markdown('<p class="author">DESARROLLADO POR: [CABO 1° ELMER RODRIGUEZ]</p>', unsafe_allow_html=True)    
     st.title("🛡️ REGISTROS POSITIVOS DEL C.O.N - C5")
     
     m = folium.Map(location=[8.9824, -79.5199], zoom_start=12)
