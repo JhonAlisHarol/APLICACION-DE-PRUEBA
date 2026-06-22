@@ -230,11 +230,6 @@ else:
                 if cierre_tipo == "SELECCIONAR": campos_faltantes.append("Cierre Tipo")
                 if cierre_subtipo == "SELECCIONAR": campos_faltantes.append("Cierre Subtipo")
                 if p1 == "SELECCIONAR": campos_faltantes.append("P1")
-                if p2 == "SELECCIONAR": campos_faltantes.append("P2")
-                if p3 == "SELECCIONAR": campos_faltantes.append("P3")
-                if p4 == "SELECCIONAR": campos_faltantes.append("P4")
-                if p5 == "SELECCIONAR": campos_faltantes.append("P5")
-                if p6 == "SELECCIONAR": campos_faltantes.append("P6")
             
             if campos_faltantes:
                 st.error(f"❌ Faltan datos obligatorios: {', '.join(campos_faltantes)}")
