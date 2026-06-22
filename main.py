@@ -229,7 +229,7 @@ else:
             else:
                 nuevo_registro = {
                     "MODO": modo, "PROVINCIA": provincia, "DISTRITO": distrito, "CORREGIMIENTO": corregimiento,
-                    "REFERENCIA": referencia, "ZP_POLICIAL": zp_policial, "RECURSOS": recursos,
+                    "REFERENCIA": referencia, "ZP_POLICIAL": zp_policial, "RECURSOS": recursos, "FECHA": fecha,
                     "FECHA_HORA": datetime.now(pytz.timezone('America/Panama')).strftime("%Y-%m-%d %H:%M:%S"),
                     "CENTRO_DE_MANDO": centro_mando, "UNIDAD_VV": unidad_vv, "CANAL_ENTRADA": canal,
                     "UNIDAD_DESPACHO": unidad_despacho, "T_INICIAL": str(t_inicial), "H_DESPACHO": str(h_despacho),
