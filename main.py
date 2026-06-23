@@ -22,24 +22,27 @@ st.markdown("""
         </style>
     """, unsafe_allow_html=True)
 
-# --- FONDO DE VIDEO DESDE GITHUB ---
 st.markdown(
     """
     <style>
-    /* 1. Fondo de video a pantalla completa */
+    /* Fondo de video a pantalla completa */
     .video-background {
         position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
+        top: 0; 
+        left: 0;
+        width: 100vw; 
+        height: 100vh;
         z-index: -9999;
         overflow: hidden;
     }
+    
     .video-background video {
-        width: 100vw; height: 100vh;
+        width: 100vw; 
+        height: 100vh;
         object-fit: cover;
     }
 
-    /* 2. Limpiar fondos de Streamlit para que el video se vea en toda la página */
+    /* Limpiar fondos de Streamlit para visibilidad total */
     .stApp, [data-testid="stSidebar"], .block-container {
         background-color: transparent !important;
         background: transparent !important;
@@ -53,9 +56,7 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True
-    )
-except Exception as e:
-    st.error(f"Error cargando video: {e}")
+)
 
 # --- 4. ESTADOS ---
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
