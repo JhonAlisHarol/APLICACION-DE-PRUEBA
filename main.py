@@ -57,8 +57,6 @@ st.markdown(
     except Exception as e:
         st.error(f"Error cargando video: {e}")
 
-set_video_background("Fondo Animado De La Tierra Girando Para Tu PC.mp4")
-
 # --- 4. ESTADOS ---
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
 if 'lat_f' not in st.session_state: st.session_state.lat_f = ""
