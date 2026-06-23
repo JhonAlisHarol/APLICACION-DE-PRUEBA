@@ -53,9 +53,9 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True
-)
-    except Exception as e:
-        st.error(f"Error cargando video: {e}")
+    )
+except Exception as e:
+    st.error(f"Error cargando video: {e}")
 
 # --- 4. ESTADOS ---
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
