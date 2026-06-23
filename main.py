@@ -22,40 +22,38 @@ st.markdown("""
         </style>
     """, unsafe_allow_html=True)
 
-# --- 3. FONDO DE VIDEO A PANTALLA COMPLETA ---
-def set_video_background(video_file):
-    try:
-        with open(video_file, "rb") as f:
-            video_bytes = f.read()
-        video_b64 = base64.b64encode(video_bytes).decode()
-        st.markdown(
-            f"""
-            <style>
-            .video-background {{
-                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                z-index: -1; overflow: hidden;
-            }}
-            .video-background video {{
-                width: 100%; height: 100%; object-fit: cover;
-            }}
-            .stApp {{ background: transparent !important; }}
-            div[data-testid="stForm"], div[data-testid="stVerticalBlock"] {{
-                background: rgba(10, 15, 25, 0.8) !important;
-                border: 2px solid #00d4ff !important;
-                border-radius: 20px;
-                padding: 25px;
-                box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
-            }}
-            h1, h2, h3 {{ color: #00d4ff !important; text-shadow: 0 0 15px #00d4ff; }}
-            </style>
-            <div class="video-background">
-                <video autoplay loop muted playsinline>
-                    <source src="data:video/mp4;base64,{video_b64}" type="video/mp4">
-                </video>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+# --- FONDO DE VIDEO DESDE GITHUB ---
+st.markdown(
+    """
+    <style>
+    /* 1. Fondo de video a pantalla completa */
+    .video-background {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        z-index: -9999;
+        overflow: hidden;
+    }
+    .video-background video {
+        width: 100vw; height: 100vh;
+        object-fit: cover;
+    }
+
+    /* 2. Limpiar fondos de Streamlit para que el video se vea en toda la página */
+    .stApp, [data-testid="stSidebar"], .block-container {
+        background-color: transparent !important;
+        background: transparent !important;
+    }
+    </style>
+
+    <div class="video-background">
+        <video autoplay loop muted playsinline>
+            <source src="https://raw.githubusercontent.com/JhonAlisHarol/APLICACION-DE-PRUEBA/main/Fondo%20Animado%20De%20La%20Tierra%20Girando%20Para%20Tu%20PC.mp4" type="video/mp4">
+        </video>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
     except Exception as e:
         st.error(f"Error cargando video: {e}")
 
