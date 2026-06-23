@@ -25,27 +25,36 @@ st.markdown("""
 st.markdown(
     """
     <style>
-    /* Fondo de video a pantalla completa */
+    /* 1. Fondo de video total */
     .video-background {
         position: fixed;
-        top: 0; 
-        left: 0;
-        width: 100vw; 
-        height: 100vh;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
         z-index: -9999;
         overflow: hidden;
     }
-    
     .video-background video {
-        width: 100vw; 
-        height: 100vh;
+        width: 100vw; height: 100vh;
         object-fit: cover;
     }
 
-    /* Limpiar fondos de Streamlit para visibilidad total */
-    .stApp, [data-testid="stSidebar"], .block-container {
+    /* 2. Limpiar fondos base */
+    .stApp, .block-container {
         background-color: transparent !important;
-        background: transparent !important;
+    }
+
+    /* 3. Estilo para el Sidebar y cajas (RECUPERANDO EL NEÓN) */
+    [data-testid="stSidebar"], div[data-testid="stVerticalBlock"] {
+        background-color: rgba(10, 15, 25, 0.7) !important; /* Fondo oscuro semi-transparente */
+        border: 2px solid #00d4ff !important;            /* El borde neón */
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);      /* El brillo del neón */
+    }
+
+    /* 4. Textos */
+    h1, h2, h3, label, p {
+        color: white !important;
     }
     </style>
 
@@ -57,7 +66,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 # --- 4. ESTADOS ---
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
 if 'lat_f' not in st.session_state: st.session_state.lat_f = ""
