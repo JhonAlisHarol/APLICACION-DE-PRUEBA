@@ -22,6 +22,8 @@ st.markdown("""
         </style>
     """, unsafe_allow_html=True)
 
+# --FONDO EN MOVIMIENTO PARA TODO EL DOCUMENTO
+
 st.markdown(
     """
     <style>
