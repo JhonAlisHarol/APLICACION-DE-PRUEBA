@@ -145,7 +145,7 @@ else:
         fecha = c1.date_input("FECHA")
         centro_mando = c1.selectbox("CENTRO DE MANDO", ["SELECCIONAR", "CON", "CORCOL", "COMCH", "COMAR", "COMDA", "COMCHEP", "CEVIBO", "COMSAM"])
         unidad_vv = c1.selectbox("UNIDAD DE VV/104", ["SELECCIONAR", "ELMER RODRIGUEZ"])
-        canal = c2.selectbox("CANAL DE ENTRADA", ["SELECCIONAR", "CLL-104", "VIDEO-VIGILANCIA", "BOTON DE PANICO", "RADIO FRECUENCIA"])
+        canal = c2.selectbox("CANAL DE ENTRADA", ["SELECCIONAR", "BOTÓN DE PÁNICO", "CLL-104", "ENLACE BCBPM", "ENLACE DIIP", "ENLACE DIP", "ENLACE DOT", "ENLACE MIBUS", "ENLACE MIGRACIÓN", "ENLACE MUPA", "ENLACE SENAFRONT CARIBE", "ENLACE SENAFRONT OCCIDENTAL", "ENLACE SENAFRONT ORIENTAL", "ENLACE SENAFRONT PMA. ESTE", "ENLACE SENAN", "OTRAS FUENTES", "RADIO FRECUENCIA", "VIDEO VIGILANCIA"])
         unidad_despacho = c2.selectbox("UNIDAD DE DESPACHO", ["SELECCIONAR", "ISMAEL PEÑA"])
         t_inicial = c3.time_input("T. INICIAL", step=60)
         h_despacho = c3.time_input("H. DESPACHO", step=60)
