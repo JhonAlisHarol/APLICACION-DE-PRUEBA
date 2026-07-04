@@ -141,7 +141,7 @@ else:
         recursos = col_loc6.selectbox("RECURSOS", ["SELECCIONAR", "AMBULANCIA 911", "AMBULANCIA C. SALUD", "AMBULANCIA CSS", "AMBULANCIA SENAN", "AMBULANCIA SERV. PRIV.", "INSPECTOR DEL DNOT", "LANCHA RÁPIDA", "LINCE PN", "LINCE SENAN", "MOTORIZADO DNOT", "PATRULLA", "PATRULLA DNOT", "PATRULLA SENAN", "PATRULLERA", "RONDA A PIES", "RONDA A PIES SENAN", "INSPECTOR ATTT", "RONDA CICLISTA", "RONDA MOTOCICLISTA", "VEH. DE EXTINCIÓN", "VEH. ESPECIALIZADOS", "RONDA A PIES SENAFRONT", "PATRULLA SENAFRONT", "LINCE SENAFRONT", "AMBULANCIA SENAFRONT"])
         
         #-1.Defina la lista unica de operadores aplicables para ambos selectbox
-        listas_personal = ["SELECCIONAR", "ELMER RODRIGUEZ", "ISMAEL PEÑA"]
+        lista_personal = ["SELECCIONAR", "ELMER RODRIGUEZ", "ISMAEL PEÑA"]
             
         #--2.Renderizado de la interfaz en streamlit    
         st.subheader("⏱️ Tiempos, Unidades y Cámaras")
