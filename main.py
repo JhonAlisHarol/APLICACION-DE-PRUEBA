@@ -131,7 +131,7 @@ else:
     with st.form("registro_maestro_total", clear_on_submit=False):
         st.subheader("📍 Ubicación y Recursos")
         col_loc1, col_loc2, col_loc3 = st.columns(3)
-        provincia = col_loc1.selectbox("PROVINCIA", ["SELECCIONAR", "LOS SANTOS", "VERAGUAS", "PANAMA", "COLÓN"])
+        provincia = col_loc1.selectbox("PROVINCIA", ["SELECCIONAR", "BOCAS DEL TORO", "COCLÉ", "COLÓN", "CHIRIQUÍ", "DARIÉN", "HERRERA", "LOS SANTOS", "PANAMÁ", "VERAGUAS", "PANAMÁ OESTE", "COMARCA GUNA YALA", "COMARCA EMBERÁ-WOUNAAN", "COMARCA NGÄBE-BUGLÉ", "COMARCA NASO TJËR DI"])
         distrito = col_loc2.selectbox("DISTRITO", ["SELECCIONAR", "COLÓN"])
         corregimiento = col_loc3.selectbox("CORREGIMIENTO", ["SELECCIONAR", "BARRIO NORTE", "ACHIOTE", "AGUA BUENA"])
         
