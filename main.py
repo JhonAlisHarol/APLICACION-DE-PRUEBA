@@ -82,7 +82,7 @@ def calcular_minutos(t_inicio, t_evento):
 def pantalla_login():
     st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
     
-    st.markdown('<p class="author">DESARROLLADO POR: [CABO 1° ELMER RODRIGUEZ]</p>', unsafe_allow_html=True)
+    st.markdown('<p class="author">APLICATIVO PERSONAL: [ELMER RODRIGUEZ, SIN ACCESO PARA USUARIOS]</p>', unsafe_allow_html=True)
 
     # Base de datos local de usuarios
     usuarios_permitidos = {
