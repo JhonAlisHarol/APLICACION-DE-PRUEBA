@@ -1,304 +1,460 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 import folium
+from folium.plugins import HeatMap, MarkerCluster
 from streamlit_folium import st_folium
-from datetime import datetime, date, time
-import pytz
-from supabase import create_client
-import base64
 
-# --- 1. CONFIGURACIÓN SUPABASE ---
-SUPABASE_URL = "https://gqwxrxszojvphfbnkcfv.supabase.co"
-SUPABASE_KEY = "sb_publishable_Y-CKD8q9mg8pBQ-CIJ88Bw_v83hmqOL"
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+st.set_page_config(
+    page_title="Centro de Operación Nacional | Dashboard Analítico",
+    page_icon="🛡️",
+    layout="wide"
+)
 
-# 2. Configuración de página
-st.set_page_config(page_title="C5 - Registro Maestro", layout="wide", initial_sidebar_state="expanded")
+# --- ESTILOS CSS CON ANIMACIÓN DE NEONES GIRATORIOS / EN MOVIMIENTO ---
 st.markdown("""
-        <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
-        </style>
-    """, unsafe_allow_html=True)
-
-# --FONDO EN MOVIMIENTO PARA TODO EL DOCUMENTO
-
-st.markdown(
-    """
     <style>
-    /* 1. Fondo de video total */
-    .video-background {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        z-index: -9999;
-        overflow: hidden;
+    /* Fondo general oscuro estilo centro de control */
+    .stApp {
+        background-color: #0b0f19;
+        color: #ffffff;
     }
-    .video-background video {
-        width: 100vw; height: 100vh;
-        object-fit: cover;
-    }
-
-    /* 2. Limpiar fondos base */
-    .stApp, .block-container {
-        background-color: transparent !important;
+    
+    /* Animación fluida de desplazamiento para la cinta de colores de neón */
+    @keyframes neonBorderMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
 
-    /* 3. Estilo para el Sidebar y cajas (RECUPERANDO EL NEÓN) */
-    [data-testid="stSidebar"], div[data-testid="stVerticalBlock"] {
-        background-color: rgba(10, 15, 25, 0.7) !important; /* Fondo oscuro semi-transparente */
-        border: 2px solid #00d4ff !important;            /* El borde neón */
-        border-radius: 20px;
-        padding: 20px;
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);      /* El brillo del neón */
+    /* Contenedor del Título Principal con Cinta Neón en Movimiento */
+    .neon-title-container {
+        border: 4px solid transparent;
+        background: linear-gradient(135deg, #101828 0%, #0b0f19 100%), 
+                    linear-gradient(90deg, #ff0055, #00ffff, #00ff66, #ffae00, #bd00ff, #ff0055);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        background-size: 300% 300%;
+        animation: neonBorderMove 6s ease infinite;
+        border-radius: 14px;
+        padding: 24px;
+        text-align: center;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(255, 0, 85, 0.3);
+        margin-bottom: 30px;
+    }
+    
+    .neon-title-text {
+        color: #00ffff;
+        font-size: 28px;
+        font-weight: 800;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: 1.5px;
+        text-shadow: 0 0 15px rgba(0, 255, 255, 0.9), 0 0 25px rgba(255, 0, 85, 0.6);
+    }
+    
+    .neon-sub-text {
+        color: #ffae00;
+        font-size: 14px;
+        font-style: italic;
+        margin-top: 10px;
+        text-shadow: 0 0 10px rgba(255, 174, 0, 0.8);
     }
 
-    /* 4. Textos */
-    h1, h2, h3, label, p {
-        color: white !important;
+    /* Contenedores con Marcos de Neón Multicolor en Movimiento para las Secciones */
+    .neon-section-box {
+        border: 3px solid transparent;
+        background: rgba(16, 24, 40, 0.7), 
+                    linear-gradient(90deg, #00ffff, #bd00ff, #ff0055, #00ff66, #00ffff);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        background-size: 300% 300%;
+        animation: neonBorderMove 6s ease infinite;
+        padding: 18px;
+        border-radius: 10px;
+        margin-top: 25px;
+        margin-bottom: 15px;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+    }
+
+    .neon-section-title {
+        color: #00ff66;
+        font-size: 19px;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(0, 255, 102, 0.8), 0 0 20px rgba(0, 255, 255, 0.5);
+        letter-spacing: 0.5px;
     }
     </style>
+""", unsafe_allow_html=True)
 
-    <div class="video-background">
-        <video autoplay loop muted playsinline>
-            <source src="https://raw.githubusercontent.com/JhonAlisHarol/APLICACION-DE-PRUEBA/main/Fondo%20Animado%20De%20La%20Tierra%20Girando%20Para%20Tu%20PC.mp4" type="video/mp4">
-        </video>
+# --- TÍTULO PRINCIPAL CON EFECTO NEÓN MULTICOLOR EN MOVIMIENTO ---
+st.markdown("""
+    <div class="neon-title-container">
+        <div class="neon-title-text">🛡️ CENTRO DE OPERACIÓN NACIONAL | ESTUDIO DE DELITOS DE ALTO IMPACTO</div>
+        <div class="neon-sub-text">DESARROLLADO BY: CABO 1° ELMER RODRIGUEZ</div>
     </div>
-    """,
-    unsafe_allow_html=True
-)
-# --- 4. ESTADOS ---
-if "autenticado" not in st.session_state: st.session_state.autenticado = False
-if 'lat_f' not in st.session_state: st.session_state.lat_f = ""
-if 'lon_f' not in st.session_state: st.session_state.lon_f = ""
+""", unsafe_allow_html=True)
 
-def calcular_minutos(t_inicio, t_evento):
-    d1 = datetime.combine(date.today(), t_inicio)
-    d2 = datetime.combine(date.today(), t_evento)
-    return round((d2 - d1).total_seconds() / 60, 2)
+# --- CONEXIÓN DIRECTA AL GOOGLE SHEET ---
+@st.cache_data(ttl=600)
+def cargar_datos_zonas():
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGwA9lT4NcdV9kosXlRP-yPUgZjPrAEIorpOL1Zb5vmHLB4RRilqAazcSDCvnWtA/pub?output=csv&gid=412219270"
+    df = pd.read_csv(url)
+    df.columns = df.columns.str.strip()
+    return df
 
-# --- 5. INTERFAZ DE LOGIN ---
-def pantalla_login():
-    st.title("🔐 CENTRO DE OPERACION NACIONAL - C5")
+try:
+    df = cargar_datos_zonas()
+
+    # --- PROCESAMIENTO ROBUSTO DE FECHA, HORA Y COORDENADAS ---
+    if 'FECHA' in df.columns:
+        df['Fecha_dt'] = pd.to_datetime(df['FECHA'], format='mixed', dayfirst=True, errors='coerce')
+        
+        df['Mes_Num'] = df['Fecha_dt'].dt.month
+        meses_es = {1: 'ENERO', 2: 'FEBRERO', 3: 'MARZO', 4: 'ABRIL', 5: 'MAYO', 6: 'JUNIO', 
+                    7: 'JULIO', 8: 'AGOSTO', 9: 'SEPTIEMBRE', 10: 'OCTUBRE', 11: 'NOVIEMBRE', 12: 'DICIEMBRE'}
+        df['Mes_Nombre'] = df['Mes_Num'].map(meses_es)
+        
+        dias_es = {0: 'LUNES', 1: 'MARTES', 2: 'MIÉRCOLES', 3: 'JUEVES', 4: 'VIERNES', 5: 'SÁBADO', 6: 'DOMINGO'}
+        df['Dia_Semana'] = df['Fecha_dt'].dt.dayofweek.map(dias_es)
     
-    st.markdown('<p class="author">APLICATIVO PERSONAL: [ELMER RODRIGUEZ, SIN ACCESO PARA USUARIOS]</p>', unsafe_allow_html=True)
+    if 'Hora' in df.columns:
+        df['Hora_int'] = pd.to_datetime(df['Hora'], format='%H:%M:%S', errors='coerce').dt.hour
+        df['Hora_int'] = df['Hora_int'].fillna(
+            pd.to_numeric(df['Hora'].astype(str).str.split(':').str[0], errors='coerce')
+        )
 
-    # Base de datos local de usuarios
-    usuarios_permitidos = {
-        "ALISJHON": "199432",
-    }
+    # Limpieza blindada de coordenadas
+    if 'LATITUD' in df.columns and 'LONGITUD' in df.columns:
+        df['Lat_clean'] = pd.to_numeric(df['LATITUD'].astype(str).str.replace(r'[^0-9.\-]', '', regex=True), errors='coerce')
+        df['Lon_clean'] = pd.to_numeric(df['LONGITUD'].astype(str).str.replace(r'[^0-9.\-]', '', regex=True), errors='coerce')
 
-    user = st.text_input("Usuario")
-    password = st.text_input("Contraseña", type="password")
-
-    if st.button("Iniciar Sesión"):
-        # Verificamos si el usuario existe y si la contraseña coincide
-        if user in usuarios_permitidos and usuarios_permitidos[user] == password:
-            st.session_state.autenticado = True
-            st.session_state.usuario_actual = user  # Útil para saber quién inició sesión
-            st.success(f"Bienvenido {user}")
-            st.rerun()
-        else:
-            st.error("Usuario o contraseña incorrectos")
-
-if not st.session_state.autenticado:
-    pantalla_login()
-else:
-    # --- 6. DASHBOARD PRINCIPAL ---
-    st.markdown('<p class="author">DESARROLLADO POR: [CABO 1° ELMER RODRIGUEZ]</p>', unsafe_allow_html=True)    
-    st.title("🛡️ REGISTROS POSITIVOS DEL C.O.N - C5")
+    col_zona = 'DescripcionZonaPolicial' if 'DescripcionZonaPolicial' in df.columns else 'ZonaPolicial'
     
-    m = folium.Map(location=[8.9824, -79.5199], zoom_start=12)
-    folium.TileLayer(tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', attr='Google', name='Hybrid').add_to(m)
-    m.add_child(folium.LatLngPopup())
-    map_data = st_folium(m, height=500, width=1300)
-
-    if map_data and map_data.get('last_clicked'):
-        st.session_state.lat_f = map_data['last_clicked']['lat']
-        st.session_state.lon_f = map_data['last_clicked']['lng']
-
-    col_a, col_b = st.columns(2)
-    col_a.text_input("Latitud capturada", value=st.session_state.lat_f, disabled=True)
-    col_b.text_input("Longitud capturada", value=st.session_state.lon_f, disabled=True)
-
-    st.divider()
-    modo = st.radio("SELECCIONE EL TIPO DE REGISTRO:", ["PREVENTIVO", "POSITIVO"], horizontal=True)
-    st.divider()
-
-    with st.form("registro_maestro_total", clear_on_submit=False):
-        st.subheader("📍 UBICACION Y RECURSOS")
-        col_loc1, col_loc2, col_loc3 = st.columns(3)
-        provincia = col_loc1.selectbox("PROVINCIA", ["SELECCIONAR", "BOCAS DEL TORO", "COCLÉ", "COLÓN", "CHIRIQUÍ", "DARIÉN", "HERRERA", "LOS SANTOS", "PANAMÁ", "VERAGUAS", "PANAMÁ OESTE", "COMARCA GUNA YALA", "COMARCA EMBERÁ-WOUNAAN", "COMARCA NGÄBE-BUGLÉ", "COMARCA NASO TJËR DI"])
-        distrito = col_loc2.selectbox("DISTRITO", ["SELECCIONAR", "AGUADULCE", "ALANJE", "ALMIRANTE", "ANTÓN", "ARRAIJÁN", "ATALAYA", "BALBOA", "BARÚ", "BESIKÓ", "BOCAS DEL TORO", "BOQUERÓN", "BOQUETE", "BUGABA", "CALOBRE", "CAÑAZAS", "CAPIRA", "CÉMACO", "CHAGRES", "CHAME", "CHANGUINOLA", "CHEPIGANA", "CHEPO", "CHIMÁN", "CHIRIRQUÍ GRANDE", "CHITRÉ", "COLÓN", "DAVID", "DOLEGA", "DONOSO", "GUALACA", "GUARARÉ", "JIRONDAI", "KANKINTÚ", "KUSAPÍN", "LA CHORRERA", "LA MESA", "LA PINTADA", "LAS MINAS", "LAS PALMAS", "LAS TABLAS", "LOS POZOS", "LOS SANTOS", "MACARACAS", "MARIATO", "MIRONÓ", "MONTIJO", "MÜNA", "NASO TJËR DI", "NATÁ", "NOLE DÜIMA", "ÑÜRÜM", "OCÚ", "OLÁ", "OMAR TORRIJOS HERRERA", "PANAMÁ", "PARITA", "PEDASÍ", "PENONOMÉ", "PESÉ", "PINOGANA", "POCRÍ", "PORTOBELO", "REMEDIOS", "RENACIMIENTO", "RÍO DE JESÚS", "SAMBÚ", "SAN CARLOS", "SAN FÉLIX", "SAN FRANCISCO", "SAN LORENZO", "SAN MIGUELITO", "SANTA CATALINA O CALOVÉBORA", "SANTA FE (DARIÉN)", "SANTA FE (VERAGUAS)", "SANTA ISABEL", "SANTA MARÍA", "SANTIAGO", "SONÁ", "TABOGA", "TIERRAS ALTAS", "TOLÉ", "TONOSÍ"])
-        corregimiento = col_loc3.selectbox("CORREGIMIENTO", ["SELECCIONAR", "24 DE DICIEMBRE", "ACHIOTE", "AGUA BUENA", "AGUA DE SALUD", "AGUA FRÍA", "AILIGANDÍ", "ALANJE", "ALCALDE DÍAZ", "ALMIRANTE", "ALTO BILINGÜE", "ALTO BOQUETE", "ALTO CABALLERO", "ALTO DE JESÚS", "ALTOS DE GÜERA", "AMADOR", "AMELIA DENIS DE ICAZA", "AGUADULCE", "ANCÓN", "ANTÓN", "ARENAS", "ARNULFO ARIAS", "AROSEMENA", "ARRAIJÁN", "ASERRÍO DE GARICHÉ", "ATALAYA", "BACO", "BÁGALA", "BAHÍA AZUL", "BAHÍA HONDA", "BAJO BOQUETE", "BAJO CEDRO", "BAJO CORRAL", "BAJO CULUBRE", "BAJOS DE GÜERA", "BAKAMA", "BARNIZAL", "BARRANCO ADENTRO", "BARRIADA 4 DE ABRIL", "BARRIADA GUAYMÍ", "BARRIO BALBOA", "BARRIO COLÓN", "CAÑAVERAL", "BARRIO FRANCÉS", "BARRIO NORTE", "BARRIO SUR", "BARRIOS UNIDOS", "BASTIMENTOS", "BAYANO", "BEJUCO", "BELISARIO FRÍAS", "BELISARIO PORRAS", "BELLA VISTA", "BETANIA", "BIJAGUAL", "BISIRA", "BISVALLES", "BOCA CHICA", "BOCA DE BALSA", "BOCA DE CUPE", "BOCA DE TUCUÉ", "BOCA DEL DRAGO", "BOCA DEL MONTE", "BOCAS DEL TORO", "BONYIK", "BOQUERÓN", "BORÓ", "BREÑÓN", "BRUJAS", "BUENA VISTA", "BUENOS AIRES", "BUGABA", "BURÍ", "BURUNGA", "CABALLERO", "CABUYA", "CACIQUE", "CAIMITILLO", "CAIMITO", "CALANTE", "CALDERA", "CALIDONIA", "CALOBRE", "CALOVÉBORA", "CAMARÓN ARRIBA", "CAMBUTAL", "CAMOGANTÍ", "CAMPANA", "CANDELARIO OVALLE", "CANTA GALLO", "CANTO DEL LLANO", "CAÑAS", "CAÑAS GORDAS", "CAÑAVERAL", "CAÑAZAS", "CAÑITA", "CAPELLANÍA", "CAPIRA", "CARLOS SANTANA ÁVILA", "CASCABEL", "CATIVÁ", "CATIVÉ", "CATORCE DE NOVIEMBRE", "CAUCHERO", "CÉBACO", "CEIBA", "CERMEÑO", "CERRO BANCO", "CERRO CAÑA", "CERRO DE CASA", "CERRO DE PLATA", "CERRO IGLESIAS", "CERRO LARGO", "CERRO PATENA", "CERRO PELADO", "CERRO PUERCO", "CERRO PUNTA", "CERRO SILVESTRE", "CERRO VIEJO", "CHAME", "CHANGUINOLA", "CHEPIGANA", "CHEPILLO", "CHEPO", "CHICÁ", "CHICHICA", "CHIGUIRÍ ARRIBA", "CHILIBRE", "CHIMÁN", "CHIRIQUÍ", "CHIRIQUÍ GRANDE", "CHITRA", "CHITRÉ", "CHUMICAL", "CHUPÁ", "CHUPAMPA", "CIRÍ DE LOS SOTOS", "CIRÍ GRANDE", "CIRICITO", "CIRILO GUAYNORA", "COCHEA", "COCHIGRO", "COCLÉ", "COCLÉ DEL NORTE", "COLÓN CRISTÓBAL ESTE", "CORDILLERA", "COROZAL", "CORRAL FALSO", "COSTA HERMOSA", "CRISTÓBAL", "CRISTÓBAL ESTE", "CUANGO", "DOS RÍOS", "EDWIN FÁBREGA", "EL ALTO", "EL ARADO", "EL AROMILLO", "EL BALE", "EL BARRERO", "EL BARRITO", "EL BEBEDERO", "EL BONGO", "EL CACAO", "EL CALABACITO", "EL CAÑAFÍSTULO", "EL CAÑO", "EL CAPURÍ", "EL CARATE", "EL CEDRO", "EL CHIRÚ", "EL CHORRILLO", "EL CIRUELO", "EL COCAL", "EL COCLA", "EL COCO", "EL COPÉ", "EL CORTEZO", "EL CRISTO", "EL CUAY", "EL EJIDO", "EL EMPALME", "EL ESPINAL", "EL ESPINO", "EL GUABO", "EL GUÁSIMO", "EL HARINO", "EL HATO", "EL HATO DE SAN JUAN DE DIOS", "EL HIGO", "EL LÍBANO", "EL LIMÓN", "EL LLANO", "EL MACANO", "EL MANANTIAL", "EL MARAÑÓN", "EL MARÍA", "EL MUÑOZ", "EL NANCITO", "EL PÁJARO", "EL PALMAR", "EL PANTANO", "EL PAREDÓN", "EL PEDREGOSO", "EL PEÑÓN", "EL PICACHO", "EL PICADOR", "EL PIRO", "EL PIRO N°2", "EL PORVENIR", "EL POTRERO", "EL PRADO", "EL PUERTO", "EL REAL DE SANTA MARÍA", "EL RETIRO", "EL RINCÓN", "EL ROBLE", "EL SESTEADERO", "EL SILENCIO", "EL TEJAR", "EL TERIBE", "EL TIJERA", "EL TORO", "EL VALLE", "EMPLANADA DE CHORCHA", "ENTRADERO DEL CASTILLO", "ERNESTO CÓRDOBA CAMPOS", "ESCOBAL", "ESPINO AMARILLO", "FEUILLET", "FINCA 12", "FINCA 30", "FINCA 4", "FINCA 51", "FINCA 6", "FINCA 60", "FINCA 66", "FLORES", "GAIGIRGORDUB", "GARACHINÉ", "GARROTE", "GATUNCITO", "GOBEA", "GOBERNADORA", "GÓMEZ", "GONZALO VÁSQUEZ", "GUABAL", "GUABITO", "GUACÁ", "GUADALUPE", "GUALACA", "GUÁNICO", "GUARARÉ", "GUARARÉ ARRIBA", "GUARIVIARA", "GUARUMAL", "GUAYABAL", "GUAYBITO", "GÜIBALE", "GUORONÍ", "GUZMÁN", "HATO CHAMÍ", "HATO COROTÚ", "HATO CULANTRO", "HATO JOBO", "HATO JULÍ", "HATO PILÓN", "HERRERA", "HICACO", "HORCONCITOS", "HORNITO", "HURTADO", "ISLA DE CAÑAS", "ISLA GRANDE", "ITURRALDE", "JÄDEBERI", "JAQUÉ", "JARAMILLO", "JINGURUDÓ", "JOSÉ DOMINGO ESPINAR", "JUAN DEMÓSTENES AROSEMENA", "JUAN DÍAS", "JUAY", "JUSTO FIDEL PALACIOS", "KANKINTÚ", "KIKARI", "KRÜA", "KUSAPÍN", "LA ARENA", "LA CARRILLO", "LA COLORADA", "LA CONCEPCIÓN", "LA ENCANTADA", "LA ENEA", "LA ENSENADA", "LA ERMITA", "LA ESMERALDA", "LA ESPIGADILLA", "LA ESTRELLA", "LA GARCEANA", "LA GLORIA", "LA GUINEA", "LA LAGUNA", "LA LAJA", "LA MESA", "LA MIEL", "LA MONTAÑUELA", "LA PALMA", "LA PASERA", "LA PAVA", "LA PEÑA", "LA PINTADA", "LA PITALOZA", "LA RAYA DE CALOBRE", "LA RAYA DE SANTA MARÍA", "LA REPRESA", "LA SOLEDAD", "LA TETILLA", "LA TIZA", "LA TRINCHERA", "LA TRINIDAD", "LA TRONOSA", "LA VILLA DE LOS SANTOS", "LA YEGUADA", "LAJAMINA", "LAJAS ADENTRO", "LAJAS BLANCAS", "LAJAS DE TOLÉ", "LAJERO", "LAS CABRAS", "LAS CRUCES", "LAS CUMBRES", "LAS DELICIAS", "LAS GARZAS", "LAS GUABAS", "LAS GUÍAS", "LAS HUACAS", "LAS LAJAS", "LAS LLANAS", "LAS LOMAS", "LAS MAÑANITAS", "LAS MARGARITAS", "LAS MINAS", "LAS OLLAS ARRIBA", "LAS PALMAS", "LAS PALMITAS", "LAS TABLAS", "LAS TABLAS ABAJO", "LAS TRANCAS", "LAS UVAS", "LEONES", "LÍDICE", "LIMÓN", "LIMONES", "LLANO ABAJO", "LLANO BONITO", "LLANO DE LA CRUZ", "LLANO DE PIEDRAS", "LLANO GRANDE", "LLANO LARGO", "LLANO NORTE", "LOLÁ", "LOMA YUCA", "LOS ALGARROBOS", "LOS ANASTACIOS", "LOS ÁNGELES", "LOS ASIENTOS", "LOS CANELOS", "LOS CASTILLOS", "LOS CERRITOS", "LOS CERROS DE PAJA", "LOS DÍAZ", "LOS HATILLOS", "LOS LLANITOS", "LOS LLANOS", "LOS MILAGROS", "LOS NARANJOS", "LOS OLIVOS", "LOS POZOS", "LOS VALLES", "MACARACAS", "MADUGANDÍ", "MAN CREEK", "MANACA", "MANUEL E. AMADOR TERRERO", "MANUEL ORTEGA", "MARACA", "MARÍA CHIQUITA", "MARIABÉ", "MARIATO", "MATEO ITURRALDE", "MENCHACA", "MENDOZA", "METETÍ", "MIGUEL DE LA BORDA", "MIRAFLORES", "MIRAMAR", "MOGOLLÓN", "MONAGRILLO", "MONJARÁS", "MONTE LIRIO", "MONTIJO", "MREENI", "MÜNÜNÍ", "NÄMNONÍ", "NANCE DE RISCÓ", "NARGANÁ", "NATÁ", "NIBA", "NIBRA", "NOMBRE DE DIOS", "NUARIO", "NUEVA CALIFORNIA", "NUEVA ESPERANZA", "NUEVA GORGONA", "NUEVA PROVIDENCIA", "NUEVO CHAGRES", "NUEVO EMPERADOR", "NUEVO MÉXICO", "NUEVO SANTIAGO", "OBALDÍA", "OCÚ", "OLÁ", "OMAR TORRIJOS", "ORIA ARRIBA", "OTOQUE OCCIDENTE", "OTOQUE ORIENTE", "PACORA", "PAJA DE SOMBRERO", "PAJONAL", "PALENQUE", "PALMAS BELLAS", "PALMIRA", "PALO GRANDE", "PARAÍSO", "PARÍS", "PARITA", "PARITILLA", "PARQUE LEFEVRE", "PÁSIGA", "PASO ANCHO", "PAYA", "PEDASÍ", "PEDREGAL", "PEDRO GONZÁLEZ", "PENONOMÉ", "PEÑA BLANCA", "PEÑAS CHATAS", "PERALES", "PESÉ", "PIEDRA ROJA", "PIEDRAS GORDAS", "PILÓN", "PINOGANA", "PIÑA", "PIXVAE", "PLAYA CHIQUITA", "PLAYA LEONA", "PLAZA DE CAISÁN", "POCRÍ", "PONUGA", "PORTOBELILLO", "PORTOBELO", "POTRERILLOS", "POTRERILLOS ABAJO", "POTRERO DE CAÑA", "POTUGA", "PROGRESO", "PÚCURO", "PUEBLO NUEVO", "PUEBLOS UNIDOS", "PUERTO ARMUELLES", "PUERTO CAIMITO", "PUERTO INDIO", "PUERTO OBALDÍA", "PUERTO PILÓN", "PUERTO PIÑA", "PUERTO VIDAL", "PUNTA CHAME", "PUNTA LAUREL", "PUNTA PEÑA", "PUNTA ROBALO", "PURIO", "QUEBRADA DE LORO", "QUEBRADA DE ORO", "QUEBRADA DE PIEDRA", "QUEBRADA DEL ROSARIO", "QUEBRADA EL CIPRIÁN", "QUEBRO", "QUERÉVALO", "RAMBALA", "REMANCE", "REMEDIOS", "RIECITO", "RINCÓN", "RINCÓN HONDO", "RÍO ABAJO", "RÍO CHIRIQUÍ", "RÍO CONGO", "RÍO CONGO ARRIBA", "RÍO DE JESÚS", "RÍO GRANDE", "RÍO HATO", "RÍO HONDO", "RÍO IGLESIAS", "RÍO INDIO", "RÍO LUIS", "RÍO SABALO", "RÍO SERENO", "RODEO VIEJO", "RODOLFO AGUILAR DELGADO", "RODRIGO LUQUE", "ROKA", "ROVIRA", "RUBÉN CANTÚ", "RUFINA ALFARO", "SABANAGRANDE", "SABANITAS", "SABOGA", "SAJALICES", "SALAMANCA", "SALTO DUPÍ", "SALUD", "SAMBOA", "SAMBÚ", "SAN ANDRÉS", "SAN ANTONIO", "SAN BARTOLO", "SAN CARLOS", "SAN CRISTÓBAL", "SAN FELIPE", "SAN FÉLIX", "SAN FRANCISCO", "SAN ISIDRO", "SAN JOSÉ", "SAN JOSÉ DEL GENERAL", "SAN JUAN", "SAN JUAN BAUTISTA", "SAN JUAN DE DIOS", "SAN JUAN DE TURBE", "SAN LORENZO", "SAN MARCELO", "SAN MARTÍN", "SAN MARTÍN DE PORRES", "SAN MIGUEL", "SAN PABLO NUEVO", "SAN PABLO VIEJO", "SAN PEDRITO", "SAN PEDRO DEL ESPINO", "SAN SAN DRUI", "SANTA ANA", "SANTA CATALINA", "SANTA CLARA", "SANTA CRUZ", "SANTA CRUZ DE CHININA", "SANTA FE", "SANTA ISABEL", "SANTA LUCÍA", "SANTA MARÍA", "SANTA MARTA", "SANTA RITA", "SANTA ROSA", "SANTIAGO", "SANTIAGO ESTE", "SANTIAGO SUR", "SANTO DOMINGO", "SANTO TOMÁS", "SETEGANTÍ", "SIEYIC", "SITIO PRADO", "SOLANO", "SOLOY", "SONÁ", "SORÁ", "SORTOVÁ", "SUSAMA", "TABOGA", "TAIMATÍ", "TEBARIO", "TIERRA OSCURA", "TIJERAS", "TINAJAS", "TOABRÉ", "TOBOBÉ", "TOCUMEN", "TOCUMEN TOCUMEN TOLE", "TOLOTE", "TONOSÍ", "TORTÍ", "TOZA", "TRES QUEBRADAS", "TUBUALÁ", "TUCUTÍ", "TULÚ", "TUWAI", "UMANÍ", "UNIÓN CHOCÓ", "UNIÓN DEL NORTE", "UNIÓN SANTEÑA", "URRACÁ", "UTIRA", "VACAMONTE", "VALLE BONITO", "VALLE DE AGUAS ARRIBA", "VALLE DE RISCÓ", "VALLE RICO", "VALLERRIQUITO", "VELADERO", "VERACRUZ", "VICTORIANO LORENZO", "VIENTO FRÍO", "VIGUÍ", "VILLA CARMEN", "VILLA LOURDES", "VILLA ROSARIO", "VILLARREAL", "VIRGEN DEL CARMEN", "VISTA ALEGRE", "VOLCÁN", "WARGANDÍ", "YAPE", "YAVIZA", "ZAPALLAL", "ZAPOTILLO"])
+    # --- PANEL DE CONTROL LATERAL: FILTROS, FECHAS Y ZONAS ---
+    st.sidebar.markdown("### 🔍 Fechas y Horas")
+    
+    if 'Fecha_dt' in df.columns and not df['Fecha_dt'].dropna().empty:
+        min_date = df['Fecha_dt'].min().date()
+        max_date = df['Fecha_dt'].max().date()
         
-        col_loc4, col_loc5, col_loc6 = st.columns(3)
-        referencia = col_loc4.text_input("REFERENCIA")
-        zp_policial = col_loc5.selectbox("ZP POLICIALES / ENLACE", ["SELECCIONAR", "FUERZA URBANA DE RÁPIDA INTERVENCIÓN - ALFA", "OPERACIONES DE TRÁNSITO", "SERVICIO DE POLICÍA DE NIÑEZ Y ADOLESCENCIA", "SERVICIO POLICIAL DE SEDES DIPLOMÁTICAS", "SERVICIO POLICIAL DE SEGURIDAD PENITENCIARIA", "SERVICIO POLICIAL MOTORIZADO", "UNIDAD DE CONTROL DE MULTITUDES (U.C.M.)", "UNIDAD DE FUERZAS ESPECIALES", "UNIDAD POLICIAL DEL METRO (U.P.M.)", "UNIDAD PREVENTIVA COMUNITARIA (U.P.C.)", "Z P - ARRAIJÁN", "Z P - BOCAS DEL TORO", "Z P - CANAL", "Z P - CHAME - CAPIRA - SAN CARLOS", "Z P - CHILIBRE", "Z P - CHIRIQUÍ", "SERVICIO POLICIAL DE VIOLENCIA DOMÉSTICA Y DE GÉNERO", "Z P - COCLÉ", "Z P - COLÓN", "Z P - COMARCAL OCCIDENTAL", "Z P - DON DOSCO", "Z P - HERRERA", "Z P - LOS SANTOS", "Z P - NORTE", "Z P - OESTE", "Z P - PACORA", "Z P - PANAMÁ OESTE", "Z P - RUFINA ALFARO", "Z P - SAN FRANCISCO", "Z P - SAN MIGUELITO", "Z P - VERAGUAS", "COORDINACIÓN CON ATTT", "COORDINACIÓN CON EMPRESA ELÉCTRICA", "COORDINACIÓN CON EL MUNICIPIO PMA", "COORDINACIÓN CON LA POLICÍA AMBIENTAL", "COORDINACIÓN CON PERSONAL DE NATURGY", "COORDINACIÓN CON POLICIA MUNICIPAL", "COORDINACIÓN CON SENAN", "COORDINACIÓN CON SINAPROC", "COORDINACIÓN CON SPI", "COORDINACIÓN CON UCM", "COORDINACIÓN CON BCBPM", "COORDINACIÓN CON POLICIA DE NIÑEZ Y ADOLESCENCIA", "DIIP", "DIJ", "SENAFRONT CARIBE", "SENAFRONT OCCIDENTAL", "SENAFRONT ORIENTAL", "SENAFRONT PMÁ. ESTE"])
-        recursos = col_loc6.selectbox("RECURSOS", ["SELECCIONAR", "AMBULANCIA 911", "AMBULANCIA C. SALUD", "AMBULANCIA CSS", "AMBULANCIA SENAN", "AMBULANCIA SERV. PRIV.", "INSPECTOR DEL DNOT", "LANCHA RÁPIDA", "LINCE PN", "LINCE SENAN", "MOTORIZADO DNOT", "PATRULLA", "PATRULLA DNOT", "PATRULLA SENAN", "PATRULLERA", "RONDA A PIES", "RONDA A PIES SENAN", "INSPECTOR ATTT", "RONDA CICLISTA", "RONDA MOTOCICLISTA", "VEH. DE EXTINCIÓN", "VEH. ESPECIALIZADOS", "RONDA A PIES SENAFRONT", "PATRULLA SENAFRONT", "LINCE SENAFRONT", "AMBULANCIA SENAFRONT"])
+        fecha_desde = st.sidebar.date_input("Desde:", value=min_date, min_value=min_date, max_value=max_date)
+        fecha_hasta = st.sidebar.date_input("Hasta:", value=max_date, min_value=min_date, max_value=max_date)
+    else:
+        fecha_desde, fecha_hasta = None, None
+
+    hora_inicial = st.sidebar.selectbox("Hora Inicial:", list(range(24)), index=0)
+    hora_final = st.sidebar.selectbox("Hora Final:", list(range(24)), index=23)
+
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🎛️ Filtros Específicos")
+    
+    tipo_delito_seleccionado = st.sidebar.selectbox(
+        "Filtrar por Tipo de Delito:", 
+        ['Todos'] + list(df['Tipo'].dropna().unique()) if 'Tipo' in df.columns else ['Todos']
+    )
+
+    zonas_disponibles = ['Todas'] + list(df[col_zona].dropna().unique()) if col_zona in df.columns else ['Todas']
+    zona_seleccionada = st.sidebar.selectbox("Filtrar por Zona Policial:", zonas_disponibles)
+
+    dias_disponibles = ['Todos', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO']
+    dia_seleccionado = st.sidebar.selectbox("Filtrar por Día de la Semana:", dias_disponibles)
+
+    # --- APLICACIÓN DE FILTROS AL DATAFRAME ---
+    df_filtrado = df.copy()
+
+    if tipo_delito_seleccionado != 'Todos':
+        df_filtrado = df_filtrado[df_filtrado['Tipo'] == tipo_delito_seleccionado]
+
+    if zona_seleccionada != 'Todas' and col_zona in df_filtrado.columns:
+        df_filtrado = df_filtrado[df_filtrado[col_zona] == zona_seleccionada]
+
+    if dia_seleccionado != 'Todos' and 'Dia_Semana' in df_filtrado.columns:
+        df_filtrado = df_filtrado[df_filtrado['Dia_Semana'] == dia_seleccionado]
+
+    if fecha_desde and fecha_hasta and 'Fecha_dt' in df_filtrado.columns:
+        df_filtrado = df_filtrado[
+            (df_filtrado['Fecha_dt'].dt.date >= fecha_desde) & 
+            (df_filtrado['Fecha_dt'].dt.date <= fecha_hasta)
+        ]
+
+    if 'Hora_int' in df_filtrado.columns:
+        df_filtrado = df_filtrado[
+            (df_filtrado['Hora_int'] >= hora_inicial) & 
+            (df_filtrado['Hora_int'] <= hora_final)
+        ]
+
+    st.sidebar.markdown("---")
+    st.sidebar.metric(label="Casos en Filtro Actual", value=f"{len(df_filtrado):,}")
+
+    # --- SECCIÓN 1: BARRAS VERTICALES DE LOS TIPOS DE DELITOS ---
+    st.markdown("""
+        <div class="neon-section-box">
+            <div class="neon-section-title">📊 DISTRIBUCIÓN GENERAL DE DELITOS DE ALTO IMPACTO</div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    if 'Tipo' in df_filtrado.columns:
+        conteo_delitos = df_filtrado['Tipo'].value_counts().reset_index()
+        conteo_delitos.columns = ['Tipo de Delito', 'Cantidad']
         
-        #-1.Defina la lista unica de operadores aplicables para ambos selectbox
-        lista_personal = ["SELECCIONAR", "CAPITÁN JORGE RODRÍGUEZ", "CAPITÁN JOSÉ MORALES", "CAPITÁN SANTIAGO SANTOS", "CAPITÁN SERAFÍN TORRES", "TENIENTE ABDIEL RAMOS", "TENIENTE ALCIBIADES ARROYO", "TENIENTE ANIBAL MARTINEZ", "TENIENTE ARIEL RODRÍGUEZ", "TENIENTE BENJAMIN OSES", "TENIENTE CARLOS IBARRA", "TENIENTE CARLOS QUIROS", "TENIENTE EDGAR HERNANDEZ", "TENIENTE EDUARDO SÁNCHEZ", "TENIENTE EDWAR FERNÁNDEZ", "TENIENTE EFREN ARJONA", "TENIENTE EINAR VARGAS", "TENIENTE ELVIS MEDINA", "TENIENTE ERIC SALA", "TENIENTE ERNESTO BOCANEGRA", "TENIENTE EUCLIDES RAMOS", "TENIENTE EUSEBIO MENDOZA", "TENIENTE FRANCISCO VELASQUEZ", "TENIENTE GILBERTO DOMINGUEZ", "TENIENTE HERNÁN DUMASA", "TENIENTE IVY MADRID", "TENIENTE JERRY JORDAN", "TENIENTE JOSE MOSQUERA", "TENIENTE JOSÉ DÍAZ", "TENIENTE JOSÉ QUINTERO", "TENIENTE JUAN LEZCANO", "TENIENTE JUAN RAMOS", "TENIENTE KENNY SANCHEZ", "TENIENTE LUIS NAVARRO", "TENIENTE MANUEL PINILLA", "TENIENTE ORLANDO ARAÚZ", "TENIENTE PABLO GONZÁLEZ", "TENIENTE RAMÓN JAÉN", "TENIENTE REGINO ORTEGA", "TENIENTE RICARDO MAYORGA", "TENIENTE RICARDO SALAS", "TENIENTE RICHARD QUIJADA", "TENIENTE ROGER SÁNCHEZ", "TENIENTE TANISHKA CONEY", "TENIENTE ÁLVARO SÁNCHEZ", "SUBTENIENTE AGAPITO RODRÍGUEZ", "SUBTENIENTE AIMETH GARCIA", "SUBTENIENTE ALBERTO DELGADO", "SUBTENIENTE ANTONIO MUDARRA", "SUBTENIENTE CHARLIE RODRIGUEZ", "SUBTENIENTE CRISTIAN DIAZ", "SUBTENIENTE DIANA RODRIGUEZ", "SUBTENIENTE DIVINIA CARREÑO", "SUBTENIENTE DÍDIMO CABALLERO", "SUBTENIENTE EDGAR CUBILLA", "SUBTENIENTE EDWARD GONZALEZ", "SUBTENIENTE ERIC SALDAÑA", "SUBTENIENTE ERIC TEJADA", "SUBTENIENTE ESTEBAN ORTEGA", "SUBTENIENTE EURIBIADES GONZÁLEZ", "SUBTENIENTE FEDERICO MARTINEZ", "SUBTENIENTE FERNANDO TAMAYO", "SUBTENIENTE FRANK GARCIA", "SUBTENIENTE GLORIA MADRID", "SUBTENIENTE HILARIO CARPINTERO", "SUBTENIENTE IRVING PINILLA", "SUBTENIENTE ISMAEL SAMUDIO", "SUBTENIENTE JAVIER CIANCA", "SUBTENIENTE JEAN GONZÁLEZ", "SUBTENIENTE JEANNETTE FRANCO", "SUBTENIENTE JESUS BATISTA", "SUBTENIENTE JHONY MORALES", "SUBTENIENTE JONATHAN PINEDA", "SUBTENIENTE JOSE BARSALLO", "SUBTENIENTE JOSE CORELLA", "SUBTENIENTE JOSÉ TRUJILLO", "SUBTENIENTE JUAN CHACÓN", "SUBTENIENTE JUAN CORPAS", "SUBTENIENTE LUIS CONTRERAS", "SUBTENIENTE LUIS DOMINGUEZ", "SUBTENIENTE LUIS TUÑON", "SUBTENIENTE MANUEL CAMARENA", "SUBTENIENTE MANUEL LYNCH", "SUBTENIENTE MARIA VERGARA", "SUBTENIENTE MELVIN FARRAGUTA", "SUBTENIENTE MICHAEL MORALES", "SUBTENIENTE MIGUEL CAMACHO", "SUBTENIENTE MOISES BOTACIO", "SUBTENIENTE OSCAR DEGRACIA", "SUBTENIENTE OSCAR MORENO", "SUBTENIENTE OSCAR VALENCIA", "SUBTENIENTE PEDRO TORRES", "SUBTENIENTE REYNALDO DE LEON", "SUBTENIENTE SABI DRAYTON", "SUBTENIENTE VICTOR MONTILLA", "SUBTENIENTE WILSON VILLARREAL", "SUBTENIENTE YARELYS HURTADO", "SUBTENIENTE YARIELA CAMPOS", "SARGENTO 1º ALADINO GALLARDO", "SARGENTO 1º ALBERTO RODRIGUEZ", "SARGENTO 1º AURELIO MARCIAGA", "SARGENTO 1º AXEL MONRROY", "SARGENTO 1º BIENVENIDO SAMANIEGO", "SARGENTO 1º CARLOS CASTILLO", "SARGENTO 1º CATALINA MORALES", "SARGENTO 1º CESAR FUENTES", "SARGENTO 1º DELIA JOVANE", "SARGENTO 1º EDGAR LARA", "SARGENTO 1º EDGAR LOPEZ", "SARGENTO 1º EDILBERTO CASTILLO", "SARGENTO 1º EDISON CEDEÑO", "SARGENTO 1º ERICK SANCHEZ", "SARGENTO 1º FELIX SAMUDIO", "SARGENTO 1º FERNANDO GONZÁLEZ", "SARGENTO 1º FRANCISCO MITRE", "SARGENTO 1º FRANKLIN RODRIGUEZ", "SARGENTO 1º GISELLE ARAUZ", "SARGENTO 1º GLORIA ARBOLEDA", "SARGENTO 1º HECTOR MEREL", "SARGENTO 1º HERMÓGENES SANJUR", "SARGENTO 1º JOAO HARRISON", "SARGENTO 1º LUIS FRÍAS", "SARGENTO 1º LUÍS SAAVEDRA", "SARGENTO 1º MAIKEL SAMUDIO", "SARGENTO 1º MAXIMILIANO PARDO", "SARGENTO 1º MIRNA RIVERA", "SARGENTO 1º NODIER RODRIGUEZ", "SARGENTO 1º OLIVER HURTADO", "SARGENTO 1º RIGOBERTO GONZALEZ", "SARGENTO 1º ROBERTO CABALLERO", "SARGENTO 1º ROSA ESPINOZA", "SARGENTO 1º VICTOR NIETO", "SARGENTO 1º YAHAIRA SALAZAR", "SARGENTO 1º YISSEL RODRIGUEZ", "SARGENTO 1º YORLENIS MOSQUERA", "SARGENTO 2º ABDIEL GOBEA", "SARGENTO 2º ABDIEL QUINTERO", "SARGENTO 2º ADOLFO MAURE", "SARGENTO 2º ALBERTO AYALA", "SARGENTO 2º ALEXANDER JIMÉNEZ", "SARGENTO 2º ALEXIS PEREZ", "SARGENTO 2º ALURIS MESSINA", "SARGENTO 2º AMADO SOLIS", "SARGENTO 2º ANA CAMARENA", "SARGENTO 2º ANAIKA SALAZAR", "SARGENTO 2º ANDRÉS GAITAN", "SARGENTO 2º ANTONINA BETHANCOURTH", "SARGENTO 2º ARQUIMEDES BUY", "SARGENTO 2º AUGUSTO DEGRACIA", "SARGENTO 2º BETZAIDA DE LEON", "SARGENTO 2º BIRON PEREZ", "SARGENTO 2º CARLOS BETHANCOURT", "SARGENTO 2º CARLOS CEDEÑO", "SARGENTO 2º CARLOS GONZALEZ", "SARGENTO 2º CARLOS SOTO", "SARGENTO 2º CELFIDA ARJONA", "SARGENTO 2º CESAR PINEDA", "SARGENTO 2º CHRISTIAN ABREGO", "SARGENTO 2º CIBY CANDANEDO", "SARGENTO 2º CLARIZEL REYES", "SARGENTO 2º CLAUDIO ABREGO", "SARGENTO 2º DANIEL GÓMEZ", "SARGENTO 2º DENIS MARTINEZ", "SARGENTO 2º DIANETH GIL", "SARGENTO 2º DIGNA SANCHEZ", "SARGENTO 2º DIOMEDES MARTÍNEZ", "SARGENTO 2º EBELIN CONCEPCION", "SARGENTO 2º EBEN EZER YEE", "SARGENTO 2º EDUARDO CORONADO", "SARGENTO 2º EINAR CACERES", "SARGENTO 2º ELEYDA PACHECO", "SARGENTO 2º ELSY DE BOZO", "SARGENTO 2º ERIC VEGA", "SARGENTO 2º ERNESTO MACHUCA", "SARGENTO 2º FERNANDO JIMÉNEZ", "SARGENTO 2º GERARDO SANTANA", "SARGENTO 2º GREGORIO CARPINTERO", "SARGENTO 2º GRICELDA MARQUEZ", "SARGENTO 2º HUGO RODRIGUEZ", "SARGENTO 2º HÉCTOR PERALTA", "SARGENTO 2º IRVING MEDINA", "SARGENTO 2º IRVING VALENCIA", "SARGENTO 2º ISAAC SANTOS", "SARGENTO 2º ISRAEL ALONZO", "SARGENTO 2º JANE PINZÓN", "SARGENTO 2º JERSSIRI GRAHAM", "SARGENTO 2º JEYSSIRI GRAHAM", "SARGENTO 2º JHON SERRANO", "SARGENTO 2º JINETTE JAÉN", "SARGENTO 2º JOEL ACOSTA", "SARGENTO 2º JOEL MONTENEGRO", "SARGENTO 2º JOEL PINTO", "SARGENTO 2º JOHANA MENDEZ", "SARGENTO 2º JONATHAN GONZALEZ", "SARGENTO 2º JOSE MIRANDA", "SARGENTO 2º JOSUE AYARZA", "SARGENTO 2º JOSUE RIVERA", "SARGENTO 2º JOSÉ CRISOLO", "SARGENTO 2º JOSÉ LOPEZ", "SARGENTO 2º JULIO VALDEZ", "SARGENTO 2º KEVIN MORALES", "SARGENTO 2º LEIDYS GONZÁLEZ", "SARGENTO 2º LEONARDO GUERRERO", "SARGENTO 2º LESLIE ARAUZ", "SARGENTO 2º LESLIE L. CALDERON", "SARGENTO 2º LIANETH CAMARGO", "SARGENTO 2º LUCIO PALACIOS", "SARGENTO 2º LUIS CAMANÑO", "SARGENTO 2º LUIS FERNANDEZ", "SARGENTO 2º LUIS MENDOZA", "SARGENTO 2º LUIS SÁNCHEZ", "SARGENTO 2º LUIS TUGRI", "SARGENTO 2º MANOLO MEJIAS", "SARGENTO 2º MARCO RODRIGUEZ", "SARGENTO 2º MARCOS CHAVEZ", "SARGENTO 2º MARGARITA SALDAÑA", "SARGENTO 2º MARIBEL SAMANIEGO", "SARGENTO 2º MERLY ÁLVAREZ", "SARGENTO 2º MOISÉS BETHANCOURT", "SARGENTO 2º NATIVIDAD CHIRU", "SARGENTO 2º NELSON MORALES", "SARGENTO 2º NICOLAS COYA", "SARGENTO 2º OLIBER MELÉNDEZ", "SARGENTO 2º PEDRO ORTEGA", "SARGENTO 2º RICHARD MONTERREY", "SARGENTO 2º ROLANDO SAMUDIO", "SARGENTO 2º ROMEL KAYS", "SARGENTO 2º RUBEN SANCHEZ", "SARGENTO 2º SANDRA ALMANZA", "SARGENTO 2º SARINA BLANCO", "SARGENTO 2º TÉOFILO GUERRA", "SARGENTO 2º ULISES GOMEZ", "SARGENTO 2º ULISES GÓMEZ", "SARGENTO 2º WILBER SAMUDIO", "SARGENTO 2º WILMER ORTIZ", "SARGENTO 2º YARIBETH ESCUDERO", "SARGENTO 2º YEIMY PÉREZ", "CABO 1º ALEXIS RIVERA", "CABO 1º ALVIN QUINTERO", "CABO 1º ANASTACIO BUITRAGO", "CABO 1º ANDY COFFRE", "CABO 1º ANGELA CENTENO", "CABO 1º ANTONY ARAÚZ", "CABO 1º ARNULFO ABREGO", "CABO 1º BERNABE BARRIA", "CABO 1º BLADIMIR SANTAMARÍA", "CABO 1º BLANER ARAUZ", "CABO 1º CARLOS ESPINOZA", "CABO 1º CHAYANE MIRANDA", "CABO 1º DAMIÁN NAVARRO", "CABO 1º DANILO SMITH", "CABO 1º DAYVIS SANTAMARIA", "CABO 1º DOMINGO ORTIZ", "CABO 1º DONICA PARKER", "CABO 1º EDGAR ARROCHA", "CABO 1º EDGAR MARQUINEZ", "CABO 1º EDGARDO JIMENEZ", "CABO 1º EDUARDO VIVERO", "CABO 1º EDWIN GONZALEZ", "CABO 1º EIVAR MONTEZUMA", "CABO 1º ELMER RODRÍGUEZ", "CABO 1º ELVIS RODRÍGUEZ", "CABO 1º ENOC NORIEGA", "CABO 1º ERICK VALDEZ", "CABO 1º ESILDA MELENDEZ", "CABO 1º FRANCISCO NUÑEZ", "CABO 1º FRANCISCO PEÑALBA", "CABO 1º GERALDINE GONZÁLEZ", "CABO 1º GUSTAVO CASTILLO", "CABO 1º GUSTAVO CUBILLA", "CABO 1º HENRY CORPAS", "CABO 1º ISMAEL PEÑA", "CABO 1º ITAMAR GONZÁLEZ", "CABO 1º JAIRO VALDEZ", "CABO 1º JAVIER GONZÁLEZ", "CABO 1º JEAN AIZPRUA", "CABO 1º JHON RIVERA", "CABO 1º JOHANA VEGA", "CABO 1º JONATHAN DUANEY", "CABO 1º JONATHAN LEZCANO", "CABO 1º JONATHAN MIRANDA", "CABO 1º JORGE ARAUZ", "CABO 1º JOSE MORAN", "CABO 1º JOSE SANCHEZ", "CABO 1º JOSÈ HERNÁNDEZ", "CABO 1º JOSÉ ROOK", "CABO 1º JUAN VÁSQUEZ", "CABO 1º JULIÁN CAMARGO", "CABO 1º KATHERINE AIZPRUA", "CABO 1º KEVIN QUINTERO", "CABO 1º LEONARDO CASASOLA", "CABO 1º LEONEL QUINTERO", "CABO 1º LEOPOLDO SERRANO", "CABO 1º LEYDA GONZÁLEZ", "CABO 1º LUGDYS VALDESPINO", "CABO 1º LUZ ESPINOZA", "CABO 1º MANUEL BECERRA", "CABO 1º MANUEL RUEDA", "CABO 1º MARIA ARAUZ", "CABO 1º MARIA MIRANDA", "CABO 1º MARÍA ARAÚZ", "CABO 1º MAYELA DE LEON", "CABO 1º MELANIE RODRÍGUEZ", "CABO 1º MICHAEL GIIL", "CABO 1º MOISÉS URRIOLA", "CABO 1º MÁXIMA MARTÍNEZ", "CABO 1º NELSON CAMAÑO", "CABO 1º NIEL GONZÁLEZ", "CABO 1º PLACIDO GONZÁLEZ", "CABO 1º RAUL BULTRON", "CABO 1º REMIGIO URRIOLA", "CABO 1º REY LARA", "CABO 1º REYNALDO CORONADO", "CABO 1º TOMAS ALVEO", "CABO 1º VISITACIÓN CARABALLO", "CABO 1º YADIRA AGUILAR", "CABO 1º YASURI QUIROS", "CABO 1º YISVEL GUADAMUZ", "CABO 1º ÁNGEL BALLESTERO", "CABO 1º ÁNGEL JORDÁN", "CABO 2º AGUSTÍN UREÑA", "CABO 2º ANGEL DE CROZ", "CABO 2º ANGEL JORDAN", "CABO 2º ARTURO SÁNCHEZ", "CABO 2º ASHLEY RODRIGUEZ", "CABO 2º ASUNCIÓN SÁNCHEZ", "CABO 2º BRANDON MONTES", "CABO 2º DIONIS HERNÁNDEZ", "CABO 2º DIVINO GULFO", "CABO 2º EDWIN RAMOS", "CABO 2º EILEEN GUTIÉRREZ", "CABO 2º EMELITZA RICHARDSON", "CABO 2º IRVING CATUY", "CABO 2º JERRY G ALLARDO", "CABO 2º JONATHAN GUERRA", "CABO 2º JOSE DEL VALLE", "CABO 2º JOSHUA CABALLERO", "CABO 2º JOSTIN AGUILAR", "CABO 2º JOSÈ HERNÁNDEZ", "CABO 2º LILIBETH CEDEÑO", "CABO 2º LUIS JIMÉNEZ", "CABO 2º RUGGER KAISAMO", "CABO 2º SIMON LUNA", "CABO 2º VALERY VELASQUEZ", "CABO 2º WALTER QUIEL", "AGENTE ALFREDO CARRASCO", "AGENTE ANA RIVERA", "AGENTE ANAVELKIS RIVERA", "AGENTE ANTHONY LOPEZ", "AGENTE ANTONIO PATRICIO", "AGENTE APOLONIO NAVARRO", "AGENTE ARELIS MENDOZA", "AGENTE ARIEL SANCHEZ", "AGENTE DAVID MARTINEZ", "AGENTE DORIAN GREAVES", "AGENTE HÉCTOR CASTILLO", "AGENTE JOSÉ SUIRA", "AGENTE JUAN AIZPUD", "AGENTE LUIS CABALLERO", "AGENTE NELSON GONZALEZ", "M.N.J. ALANIS GUILLEN", "M.N.J. ALDRIK LEE", "M.N.J. ANA QUIJADA", "M.N.J. ANABELIS ALVAREZ", "M.N.J. ANGELICA RODRIGUEZ", "M.N.J. DALILA TREJOS", "M.N.J. DAYANA RANGEL", "M.N.J. FERMIN BROCK", "M.N.J. GABRIEL MOSQUERA", "M.N.J. GERARDO PRICE", "M.N.J. GERMAN ESPINO", "M.N.J. IVETTE GIERHART", "M.N.J. KIMBERLY ORTIZ", "M.N.J. LAURIN DOMINGUEZ", "M.N.J. LISSETH SANCHEZ", "M.N.J. RAQUEL FOULING", "M.N.J. SUANELY EDWARDS", "M.N.J. XENIA DIAZ"]
-            
-        #--2.Renderizado de la interfaz en streamlit    
-        st.subheader("⏱️TIEMPO, UNIDADES Y CAMARAS")
-        c1, c2, c3, c4 = st.columns(4)
-        fecha = c1.date_input("FECHA")
-        centro_mando = c1.selectbox("CENTRO DE MANDO", ["SELECCIONAR", "CON", "CORCOL", "COMCH", "COMAR", "COMDA", "COMCHEP", "CEVIBO", "COMSAM"])
-            
-        # Aplicando la lista unica aqui
-        unidad_vv = c1.selectbox("UNIDAD DE VV/104", lista_personal)
-            
-        canal = c2.selectbox("CANAL DE ENTRADA", ["SELECCIONAR", "BOTÓN DE PÁNICO", "CLL-104", "ENLACE BCBPM", "ENLACE DIIP", "ENLACE DIP", "ENLACE DOT", "ENLACE MIBUS", "ENLACE MIGRACIÓN", "ENLACE MUPA", "ENLACE SENAFRONT CARIBE", "ENLACE SENAFRONT OCCIDENTAL", "ENLACE SENAFRONT ORIENTAL", "ENLACE SENAFRONT PMA. ESTE", "ENLACE SENAN", "OTRAS FUENTES", "RADIO FRECUENCIA", "VIDEO VIGILANCIA"])
-
-        # Aplicando la misma lista unica aqui
-        unidad_despacho = c2.selectbox("UNIDAD DE DESPACHO", lista_personal)
-        
-        t_inicial = c3.time_input("T. INICIAL", step=60)
-        h_despacho = c3.time_input("H. DESPACHO", step=60)
-        v_despacho = calcular_minutos(t_inicial, h_despacho)
-        camara_id = c3.text_input("CAMARA/ID")
-        c3.number_input("V. DESPACHO (min)", value=v_despacho, disabled=True)
-        h_atencion = c4.time_input("H. ATENCION", step=60)
-        v_atencion = calcular_minutos(t_inicial, h_atencion)
-        c4.number_input("V. ATENCION (min)", value=v_atencion, disabled=True)
-        h_cierre = c4.time_input("H. CIERE", step=60)
-        v_cierre = calcular_minutos(t_inicial, h_cierre)
-        c4.number_input("V. CIERRE (min)", value=v_cierre, disabled=True)
-
-        st.subheader("📋 INCIDENTES")
-        lista_maestra_a = ["SELECCIONAR", "ACCIDENTE DE TRÁNSITO", "ACCIDENTES", "ALERTAS", "AMENAZA NATURAL O ANTROPOGÉNICA", "ASUNTOS REL. CON NIÑOS(AS) Y ADOLESCENTES", "DELITO CONTRA EL ORDEN ECONÓMICO", "DELITO CONTRA LA ADM. PÚBLICA", "DELITO CONTRA LA LIBERTAD", "DELITO-CONTRA EL AMBIENTE", "DELITO-CONTRA EL PATRIMONIO ECONÓMICO", "DELITO-CONTRA LA ADM. DE JUSTICIA", "DELITO-CONTRA LA FE PÚBLICA", "DELITO-CONTRA LA HUMANIDAD", "DELITO-CONTRA LA SEGURIDAD COLECTIVA", "DELITO-HOMICIDIO", "DELITO-HURTO", "DELITO-INTEGRIDAD-SEXUAL", "DELITO-LESIONES CONTRA LA LIBERTAD", "DELITO-LESIONES PERSONALES", "DELITO-ORDEN JUR. FLIAR.", "DELITO-ROBO", "FALTA- BOLETAS-OFICIO", "FALTA-ASUNTOS CIVILES", "FALTA-COMUNITARIA Y VECINALES", "FALTA-MEDIDAS PROVISIONALES", "INFORMACIÓN OBTENIDA", "INFRACCIÓN DE TRÁNSITO", "ORDEN PÚBLICO", "OTRAS ALERTAS", "PERSONAS EXÁNIME", "TENTATIVA DE SUICIDIO"]
-        lista_maestra_b = ["SELECCIONAR", "A BANCO CON ARMA DE FUEGO", "A LOCAL COMERCIAL", "A PERSONA CON ARMA BLANCA", "A PERSONA CON ARMA DE FUEGO", "A PROPIEDAD", "A RESIDENCIA", "A TURISTA CON ARMA BLANCA", "A TURISTA CON ARMA DE FUEGO", "ABANDONO DE HOGAR", "ACCESORIO DE VEHÍCULO", "ACCIDENTE FERROVIARIO", "ACCIDENTE FERROVIARIO CON VÍCTIMA FATAL", "ACOSO SEXUAL", "ACTIVIDAD COMERCIAL SIN PERMISO", "ACTIVIDADES DE DIVERSIÓN PÚBLICA SIN PERMISO", "ACTOS CONTRA LA INT. Y SEG. CIUDADANA", "ÁEREO", "AGRESIONES FISICAS", "AGRESIONES VERBALES", "ALARMA ACTIVADA", "ALERTA AMBER", "ALTERACIÓN DE LA CONVIVENCIA PACÍFICA", "ALUD", "ANIMALES DOMÉSTICOS", "ANIMALES EN SOLTURA", "APROPIACIÓN INDEBIDA", "ARBOLADO RURAL Y URBANO", "ARTEFACTOS PIROTÉCNICOS", "ASISTENCIA CIUDADANA", "ASUNTOS RELACIONADOS CON SERVIDUMBRES", "ATROPELLO", "ATROPELLO CON VÍCTIMA FATAL", "AVENIDAS ANEGADAS", "BOTÓN DE PÁNICO", "CAÍDA DE ÁRBOL", "CAÍDA DE PERSONA", "CAÍDA DE POSTE ELÉCTRICO", "CAPTURA", "CHOQUE CON OBJETO FIJO", "CHOQUE CON VÍCTIMA FATAL", "CHOQUE DE ALTO IMPACTO", "CHOQUE Y VUELCO", "CIERRE DE VÍA", "CITACIÓN", "COLISIÓN CON VÍCTIMA FATAL", "COLISIÓN DE ALTO IMPACTO", "COLISIÓN MENOR", "COLISIÓN MULTIPLE", "COLISIÓN Y FUGA", "COLISIÓN Y VUELCO", "CON ARMA BLANCA", "CON FRACTURA A PERSONA", "CON FRACTURA A PROPIEDAD", "CON FRACTURA A TURISTA", "CON FRACTURA ACCESORIO DE VEHÍCULO", "CON OBJETO CONTUNDENTE", "CONATO DE INCENDIO", "CONDUCCIÓN", "CONDUCIR BAJO LOS EFECTOS DE ESTUPEFACIENTES", "CONDUCIR DE FORMA DESORDENADA", "CONDUCIR EN ESTADO DE EMBRIAGUEZ COMPROBADA", "CONDUCIR EN VÍA CONTRARIA O", "CONDUCIR POR EL HOMBRO", "CONSTRUCCIÓN SIN PERMISO", "CONSUMO DE LICOR EN VÍA PÚBLICA", "CONTACTO DE FAUNA Y VIDA SILVESTRE", "CONTRA LA MORAL Y BUENAS COSTUMBRES", "CONTRABANDO", "CORRUPCIÓN DE NIÑOS(AS) - ADOLESCENTES", "DAÑO A LA PROP. PRIVADA", "DAÑO A LA PROP. PÚBLICA", "DAÑOS U OCUPACIÓN DE LA PROPIEDAD", "DE VEHÍCULO", "DE VEHÍCULO", "DE VEHÍCULO CON ARMA BLANCA", "DE VEHÍCULO CON ARMA DE FUEGO", "DECOMISO ACCESORIO DE ARMA DE FUEGO", "DERRAME DE FLUIDO BIOLÓGICO O QUÍMICO", "DERRAPE DE MOTORIZADO", "DERRAPE DE MOTORIZADO CON VÍCTIMA FATAL", "DERRUMBE", "DESATENDER SEÑALES", "DESLIZAMIENTO", "DETONACIONES", "EJERCICIO ILEGAL DE UNA PROFESIÓN", "EMITIR GASES, RUIDOS O SONIDOS EXCESIVOS", "EN CIRCUNSTANCIAS ESPECIALMENTE DIFÍCILES", "ESTAFA", "ESTAFA SIMPLE", "EVASIÓN", "EVASIÓN DE CENTRO PENAL", "EXCESO DE PASAJEROS", "EXTORSIÓN", "FALSIFICACIÓN DE DOCUMENTOS", "FALSIFICACIÓN DE MONEDAS", "FETO ENCONTRADO", "FILTRACIÓN DE AGUA", "FRAUDE", "GIRAR EN FORMA DE U SOBRE LA VÍA", "HACER COMPETENCIA DE VELOCIDAD (REGATAS)", "HALLAZGO DE ARMA DE FUEGO", "HALLAZGO DE CADÁVER", "HALLAZGO DE DROGAS", "INCENDIO", "INCENDIO - DE VEHÍCULO", "INCENDIO - ESTRUCTURA", "INCENDIO DE DESECHOS NO ORGÁNICOS", "INCENDIO DE MASA VEGETAL", "INCUMPLIMIENTO DE PRÉSTAMO O SERVICIO", "INRRESPETO A LA AUTORIDAD", "INTENTO", "INTENTO A PERSONA", "INTENTO DE VEHÍCULO", "INTENTO DE VIOLACIÓN", "INUNDACIÓN", "INVIOLABILIDAD DEL DOMICILIO", "JUEGOS DE AZAR", "LANZAMIENTO POR INTRUSO", "LESIONES AUTOINFRIGIDAS", "LIBERTAD VIGILADA", "LUCES INADECUADAS", "MALTRATO AL ADULTO MAYOR", "MALTRATO DE NIÑOS(AS)-ADOLESCENTES", "MANIFESTACIÓN O PIQUETEO", "MARCHA", "MEDIDA CAUTELAR PATRIMONIAL", "MOLESTIAS O DAÑOS POR ANIMALES DOMÉSTICOS", "MUERTE ACCIDENTAL", "MUERTE NATURAL", "MUERTE POR INMERSIÓN", "MUERTE POR SUSPENSIÓN", "NAUFRAGIO", "NEGARSE A DETENER EL VEHÍCULO", "NEGARSE A REALIZAR LA PRUEBA DE ALCOHOLEMIA", "NO PORTAR DOCUMENTO DE IDENTIDAD PERSONAL", "NO PORTAR LICENCIA DE CONDUCIR", "NUNCA HA SACADO LICENCIA", "OBSTRUCCIÓN DE LA LABOR POLICIAL", "OBSTRUCCIÓN DE LA VÍA PÚBLICA", "OTRAS", "PAPEL AHUMADO EN TONO O LUGAR NO AUTORIZADO", "PASTIZALES", "PATRIMONIO HISTÓRICO DE LA NACIÓN", "PECUARIO", "PENSIONES ALIMENTICIAS", "PERSONA CON PROBLEMAS MENTALES", "PERSONA EN ACTITUD INUSUAL", "PERSONA ENCERRADA O ATRAPADA", "PERSONA EXTRAVIADA", "PERSONA O VEHÍCULO CON ARMA DE FUEGO", "PERSONA O VEHÍCULO CON DROGA", "PERSONA SIN TECHO", "PERSONA TENDIDA EN EL PAVIMENTO O HERBAZAL", "POLICÍA INVOLUCRADO EN CASO", "POR ACTO INFRACTOR", "PORNOGRAFÍA NIÑOS(AS) - ADOLESCENTES", "PORTAR PLACA CON DISEÑO DIFERENTE A LA OFICIAL", "PRIVACIÓN DE LIBERTAD", "PROCESOS DE DESALOJO", "PROSTITUCIÓN NIÑOS(AS) - ADOLESCENTES", "PROVOCACIONES O AMAGOS", "PUNTO DE CONTROL", "PUNTO DE OBSERVACIÓN", "QUEBRANTAMIENTO DE BOLETA DE PROTECCIÓN", "QUEMA DE BASURA", "REALIZAR GIRO PROHIBIDO", "REMOLCAR OTRO VEHÍCULO SIN LAS DEBIDAS MEDIDAS DE SEGURIDAD", "RIÑA O PELEA", "SIMPLE", "SIMPLE A PERSONA", "SIMPLE A PROPIEDAD", "SIMPLE DE VEHÍCULO", "SISMO", "SOBORNO-CORRUPCIÓN A SERVIDORES PÚBLICOS", "SUBROGADO PENAL", "SUPUESTA VENTA DE DROGAS", "SUPUESTA VINCULACIÓN A DELITO", "SUPUESTAS DETONACIONES", "SUPUESTO CONSUMO DE DROGAS", "SUPUESTO INTERCAMBIO DE DISPAROS", "SUSTRACCIÓN DE MENORES DE EDAD", "TRÁFICO DE MENORES DE EDAD", "TRÁFICO ILICITO DE INMIGRANTES", "TRÁFICO Y RECESIÓN DE COSAS PROVENIENTE DEL DELITO", "TRANSPORTE EN VEHÍCULO NO AUTORIZADO", "TRASLADO A SALA DE ATENCIÓN CIUDADANA.", "TRATA DE PERSONAS", "TSUNAMI", "TURBA", "URGENCIAS MÉDICAS", "USURPACIÓN", "VEHÍCULO ABANDONADO", "VEHÍCULO DE VALORES CON DESPERFECTO MECÁNICO", "VEHÍCULO MAL ESTACIONADO", "VEHÍCULO SIN PLACA", "VEHÍCULO SOSPECHO", "VENTA DE LICOR", "VENTA DE LICOR A MENORES", "VERIFICACIÓN A HOTELES Y CASINOS", "VERIFICACIÓN DE AERONAVES", "VERIFICACIÓN DE BANCOS Y CAJEROS", "VERIFICACIÓN DE BOMBAS DE COMBUSTIBLES", "VERIFICACIÓN DE CANCHAS Y CAMPOS DEPORTIVOS", "VERIFICACIÓN DE CENTROS EDUCATIVOS", "VERIFICACIÓN DE EMBARCACIONES O LANCHAS", "VERIFICACIÓN DE FAUNA DOMÉSTICA", "VERIFICACIÓN DE FINCAS", "VERIFICACIÓN DE LAVA AUTOS", "VERIFICACIÓN DE MOTOS", "VERIFICACIÓN DE PLAYAS O RÍOS", "VIDA SILVESTRE", "VIOLACIÓN", "VIOLENCIA DOMÉSTICA", "VOLANTEO", "VUELCO", "VUELCO CON VÍCTIMA FATAL"]
-        c8, c9 = st.columns(2)
-        tipo_inc = c8.selectbox("TIPO DE INCIDENTES", lista_maestra_a)
-        subtipo_inc = c9.selectbox("SUBTIPO DE INCIDENTES", lista_maestra_b)
-
-        # --- AQUI VA EL BLOQUE NUEVO ---
-        vehiculos_verificados = 0
-        personas_verificadas = 0
-
-        if modo == "PREVENTIVO":
-            st.subheader("🛡️ DETALLES PREVENTIVOS")
-            col_v, col_p = st.columns(2)
-            vehiculos_verificados = col_v.number_input("VEHICULOS VERIFICADOS", min_value=0, step=1)
-            personas_verificadas = col_p.number_input("PERSONAS VERIFICADAS", min_value=0, step=1)
-        # ------------------------------
-
-        cierre_tipo, cierre_subtipo = "N/A", "N/A"
-        p1, p2, p3, p4, p5, p6 = "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
-        # --- BLOQUE DE POSITIVOS ---
-        if modo == "POSITIVO":
-            c_cierre1, c_cierre2 = st.columns(2)
-            cierre_tipo = c_cierre1.selectbox("CIERRE TIPO", lista_maestra_a)
-            cierre_subtipo = c_cierre2.selectbox("CIERRE SUBTIPO", lista_maestra_b)
-            
-            # Definimos la lista una sola vez para los 6 campos
-            lista_pos = ["SELECCIONAR", "APOYO A VEHICULO DE VALORES DESPERFECTOS", "APOYO AL CIUDADANO", "APOYO AL CIUDADANO BRINDAR SEGURIDAD A UNA PROSECION", "APOYO AL CIUDADANO CRUCE DE PEATÓN", "APOYO AL CIUDADANO PARA REPARAR VEHÍCULO", "APOYO AL CIUDADANO RESCATE DE PERSONA", "APREHENSIÓN DE MENOR POR ALERTA DE CUSTODIA", "ARMA DE FUEGO - DECOMISO - ESCOPETA", "ARMA DE FUEGO - DECOMISO - FUSIL", "ARMA DE FUEGO - DECOMISO - RIFLE", "ARMA DE FUEGO - DECOMISO - PISTOLA", "ARMA DE FUEGO - DECOMISO - REVOLVER", "ARMA DE FUEGO - HALLAZGO - ESCOPETA", "ARMA DE FUEGO - HALLAZGO - FUSIL", "ARMA DE FUEGO - HALLAZGO - PISTOLA", "ARMA DE FUEGO - HALLAZGO - REVOLVER", "ARMA DE FUEGO - REPLICA DECOMISO", "APOYO AL CIUDADANO RESCATE DE EMBARCACION", "ARMA DE FUEGO - REPLICA HALLAZGO", "ARTICULO DE DUDOSA PROCEDENCIA", "ARTICULO RECUPERADOS", "ATENCIÓN DE ATROPELLO", "ATENCIÓN DE ATROPELLO CON VICTIMA FATAL", "ATENCIÓN DE CAIDA DE VEHICULO EN LA CUNETA", "ATENCIÓN DE CHOQUE CON OBJETO FIJO", "ATENCIÓN DE COLISIÓN DE ALTO IMPACTO", "ATENCIÓN DE COLISIÓN CON VÍCTIMA FATAL", "ATENCIÓN DE COLISIÓN MENOR", "ATENCIÓN DE COLISIÓN MULTIPLE", "ATENCIÓN DE COLISION Y VUELCO", "ATENCIÓN DE DERRAME DE COMBUSTIBLE", "ATENCIÓN DE DERRAPE DE MOTORIZADO", "ATENCIÓN DE DERRAPE DE MOTORIZADO CON VÍCTIMA FATAL", "ATENCIÓN DE TRIPLE COLISIÓN", "ATENCIÓN DE VUELCO", "ATENCIÓN PREHOSPITALARIA BCBPA", "ATENCIÓN PREHOSPITALARIA CSS", "ATENCIÓN PREHOSPITALARIA MINSACAPSI", "ATENCIÓN PREHOSPITALARIA PRIVADA", "ATENCIÓN PREHOSPITALARIA POLICÍA NACIONAL", "ATENCIÓN PREHOSPITALARIA SUME 911", "CIUDADANO CAPTURADO POR ALERTA PENITENCIARIA", "CIUDADANO APREHENDIDO", "CIUDADANO APREHENDIDO POR INVIOLABILIDAD DEL DOMICILIO", "CIUDADANO APREHENDIDO POR LIBERTAD VIGILADA", "CIUDADANO APREHENDIDO CON ACCESORIO DE ARMA DE FUEGO", "CIUDADANO APREHENDIDO POR SUPUESTA VINCULACIÓN A DELITO", "CIUDADANO APREHENDIDO POR SUBROGADO PENAL", "CIUDADANO APREHENDIDO POR PRIVACIÓN DE LIBERTAD", "CIUDADANO APREHENDIDO POR ESTAFA SIMPLE", "CIUDADANO APREHENDIDO POR INTENTO DE VIOLACIÓN", "CIUDADANO APREHENDIDO POR MALTRATO DE NIÑOS(AS)-ADOLESCENTES", "CIUDADANO APREHENDIDO POR AGRESIONES FISICAS", "CIUDADANO APREHENDIDO POR AGRESIONES VERBALES", "CIUDADANO APREHENDIDO POR QUEBRANTAMIENTO DE BOLETA DE PROTECCIÓN", "CIUDADANO APREHENDIDO POR LESIONES PERSONALES CON ARMA BLANCA", "CIUDADANO APREHENDIDO POR FALSIFICACIÓN DE DOCUMENTOS", "CIUDADANO APREHENDIDO POR FALSIFICACIÓN DE MONEDAS", "CIUDADANO APREHENDIDO POR NO PORTAR DOCUMENTO DE IDENTIDAD PERSONAL", "CIUDADANO APREHENDIDO POR DAÑO A LA PROP. PRIVADA", "CIUDADANO APREHENDIDO POR ALTERACIÓN DE LA CONVIVENCIA PACÍFICA", "CIUDADANO APREHENDIDO POR RIÑA O PELEA", "CIUDADANO APREHENDIDO POR CONSUMO DE LICOR EN VÍA PÚBLICA", "CIUDADANO APREHENDIDO POR VIOLENCIA DOMÉSTICA", "CIUDADANA APREHENDIDA POR VIOLENCIA DOMÉSTICA", "CIUDADANO APREHENDIDO CON SUSTANCIAS ILÍCITAS", "CIUDADANO APREHENDIDO POR LESIONES PERSONALES", "CIUDADANO APREHENDIDO POR OFICIO DE CAPTURA", "CIUDADANO APREHENDIDO POR OFICIO DE CONDUCCIÓN", "CIUDADANO APREHENDIDO POR HURTO A PROPIEDAD", "CIUDADANO APREHENDIDO POR HURTO", "CIUDADANO APREHENDIDO POR INTENTO DE HURTO", "CIUDADANO APREHENDIDO POR HURTO DE ACCESORIO DE VEHÍCULO", "CIUDADANO APREHENDIDO POR HURTO A LOCAL COMERCIAL", "CIUDADANO APREHENDIDO POR HURTO SIMPLE A PERSONA", "CIUDADANO APREHENDIDO POR HURTO SIMPLE A PROPIEDAD", "CIUDADANO APREHENDIDO POR HURTO A RESIDENCIA", "CIUDADANO APREHENDIDO POR HURTO DE VEHÍCULO", "CIUDADANO APREHENDIDO POR ROBO A PERSONA CON ARMA DE FUEGO", "CIUDADANO APREHENDIDO POR ROBO A PROPIEDAD", "CIUDADANO APREHENDIDO POR ROBO A LOCAL COMERCIAL", "CIUDADANO APREHENDIDO POR ROBO SIMPLE A PERSONA", "CIUDADANO APREHENDIDO POR ROBO SIMPLE (CARTERISTA)", "CIUDADANO APREHENDIDO POR ROBO DE VEHÍCULO (ALERTA TEMPRANA)", "CIUDADANO APREHENDIDO CON ARMA BLANCA", "CIUDADANO APREHENDIDO CON ARMA DE FUEGO", "CIUDADANO NOTIFICADO POR OFICIO DE CITACIÓN", "CIUDADANO APREHENDIDO POR EVASIÓN DE CENTRO PENAL", "COORDINACIÓN CON CASA DE JUSTICIA Y PAZ", "COORDINACIÓN CON ALCALDÍA MUNICIPAL", "COORDINACIÓN CON ATENCIÓN PRIMARIA", "DECOMISO DE ARTICULOS PROHIBIDOS", "DECOMISO DE CAJETILLAS CIGARRILLOS", "HALLAZGO DE SUSTANCIA ILÍCITA", "DECOMISO DE SUSTANCIA ILÍCITA", "EXTINCIÓN DE INCENDIO", "EXTINCIÓN DEL CONATO DE INCENDIO", "INFRACCIÓN POR CEDER EL MANEJO A PERSONA NO AUTORIZADA", "INFRACCIÓN POR CONDUCIR A VELOCIDAD SUPERIOR AL LIMITE", "INFRACCIÓN POR CONDUCIR CON ALIENTO ALCOHÓLICO", "INFRACCIÓN POR CONDUCIR DE FORMA DESORDENADA", "INFRACCIÓN POR CONDUCTOR EN ESTADO DE EMBRIAGUEZ COMPROBADO", "INFRACCIÓN POR CONDUCTOR EN ESTADO ETILICO", "INFRACCIÓN POR EMITIR GASES, RUIDOS O SONIDOS EXCESIVOS", "INFRACCIÓN POR DAÑO A LA PROPIEDAD", "INFRACCIÓN POR DESATENDER LINEAS DE NO PARE, PASO PEATONAL E INDICACIONES DEL", "INFRACCIÓN POR CONDUCIR POR EL CARRIL INDEBIDO", "INFRACCIÓN POR NEGARSE A HACERSE LA PRUEBA DE ALCOHOLEMIA", "INFRACCIÓN POR DESATENDER SEÑALES", "INFRACCIÓN POR HABLAR POR TELÉFONO CELULAR AL CONDUCIR", "INFRACCIÓN POR LICENCIA NO ADECUADA AL VEHICULO", "INFRACCIÓN POR LUCES INADECUADAS", "INFRACCIÓN POR CONDUCIR SIN CHALECO REFLECTIVO", "INFRACCIÓN NUNCA HA SACADO LICENCIA", "INFRACCIÓN POR NO PORTAR LICENCIA DE CONDUCIR", "INFRACCIÓN POR NO UTILIZAR EL CINTURÓN DE SEGURIDAD", "INFRACCIÓN POR PAPEL AHUMADO EN TONO O LUGAR NO AUTORIZADO", "INFRACCIÓN POR PASAR SEMÁFORO EN LUZ ROJA", "INFRACCIÓN POR POLIZA VENCIDA", "INFRACCIÓN POR PORTAR PLACA CON DISEÑO DIFERENTE A LA OFICIAL", "INFRACCIÓN POR PRESTAR EL SERVICIO EN RUTA DISTINTA A LA ESTABLECIDA", "INFRACCIÓN POR PRESTAR SERVICIO DE TRÁNSPORTE PÚBLICO EN VEHÍCULO NO AUTORIZADO", "INFRACCIÓN POR REALIZAR GIROS PROHIBIDOS", "INFRACCIÓN POR SIN CONDICIONES ADECUADAS DE SEGURIDAD", "INFRACCIÓN POR NEGARSE A DETENER EL VEHÍCULO", "INFRACCIÓN POR SIN EQUIPOS DE SEGURIDAD", "INFRACCIÓN POR CIRCULAR EN VÍA CONTRARIA", "INFRACCIÓN POR TRANSPORTAR EXESO DE PASAJERO", "INFRACCIÓN POR VEHÍCULOS DE TRANSPORTE PÚBLICO Y COMERCIAL SIN IDENTIFICACIÓN", "INFRACCIÓN POR VEHICULO CON LUCES NO ADECUADAS", "INFRACCIÓN POR VEHÍCULO SIN CINTA REFLECTIVA", "INFRACCIÓN POR VEHÍCULOS MAL ESTACIONADOS", "INFRACCIÓN POR REMOLCAR OTRO VEHÍCULO SIN LAS DEBIDAS MEDIDAS DE SEGURIDAD", "MENOR INFRACTOR POR HURTO", "MENOR INFRACTOR POR ROBO", "PROVEEDOR", "INFRACCIÓN POR LICENCIA DE CONDUCIR VENCIDA", "VEHÍCULO SOSPECHOSO", "RECUPERACIÓN DE MENOR EVADIDO", "REMOCIÓN DE VEHÍCULO EN GRÚA", "RESCATE DE ANIMAL DOMESTICO", "RESCATE DE MENOR POR ALERTA AMBER", "RESCATE DE MENOR POR RIEGO SOCIAL", "RESCATE DE PERSONA", "RESCATE DE VIDA Y FAUNA SILVESTRE", "RESTABLECIMIENTO DE LA SEGURIDA VÍAL", "RESTITUCIÓN DE PROPIEDAD EXTRAVIADA", "TRASLADO A HOSPITAL", "TRASLADO A HOSPITAL POR SUME 911", "TRASLADO A HOSPITAL POR BCBPA", "TRASLADO A HOSPITAL POR SERV. PRIVADO", "TRASLADO A HOSPITAL POR POLICÍA NACIONAL", "TRASLADO A HOSPITAL POR CSS", "VEHÍCULO RECUPERADO", "VEHÍCULO RECUPERADO POR SECUESTRO JUDICIAL DE BIENES", "VEHÍCULO RECUPERADO POR APROPIACIÓN INDEBIDA", "VEHÍCULO RECUPERADO POR HURTO (ALERTA TEMPRANA)", "VEHÍCULO RECUPERADO POR ROBO (ALERTA TEMPRANA)", "VEHÍCULO RECUPERADO POR OFICIO DE HURTO", "VEHÍCULO RECUPERADO POR OFICIO DE ROBO"]
-            
-            st.write("Selección de Categorías:")
-            
-            # Fila 1: P1, P2, P3
-            cols_top = st.columns(3)
-            p1 = cols_top[0].selectbox("P1", lista_pos)
-            p2 = cols_top[1].selectbox("P2", lista_pos)
-            p3 = cols_top[2].selectbox("P3", lista_pos)
-            
-            # Fila 2: P4, P5, P6
-            cols_bottom = st.columns(3)
-            p4 = cols_bottom[0].selectbox("P4", lista_pos)
-            p5 = cols_bottom[1].selectbox("P5", lista_pos)
-            p6 = cols_bottom[2].selectbox("P6", lista_pos)
-
-        narrativa = st.text_input("REPORTE/NARRATIVA")
-        link_video = st.text_input("ENLACE DE VÍDEO")
-        submitted = st.form_submit_button("Guardar Registro")
-        
-        if submitted:
-            # --- VALIDACIÓN ESTRICTA ---
-            campos_faltantes = []
-            if provincia == "SELECCIONAR": campos_faltantes.append("Provincia")
-            if distrito == "SELECCIONAR": campos_faltantes.append("Distrito")
-            if corregimiento == "SELECCIONAR": campos_faltantes.append("Corregimiento")
-            if zp_policial == "SELECCIONAR": campos_faltantes.append("ZP Policial")
-            if recursos == "SELECCIONAR": campos_faltantes.append("Recursos")
-            if centro_mando == "SELECCIONAR": campos_faltantes.append("Centro de Mando")
-            if unidad_vv == "SELECCIONAR": campos_faltantes.append("Unidad VV/104")
-            if canal == "SELECCIONAR": campos_faltantes.append("Canal de Entrada")
-            if unidad_despacho == "SELECCIONAR": campos_faltantes.append("Unidad de Despacho")
-            if tipo_inc == "SELECCIONAR": campos_faltantes.append("Tipo de Incidente")
-            if subtipo_inc == "SELECCIONAR": campos_faltantes.append("Subtipo de Incidente")
-            if not camara_id.strip(): campos_faltantes.append("ID Cámara")
-            if not narrativa.strip(): campos_faltantes.append("Narrativa")
-            if not link_video.strip(): campos_faltantes.append("Enlace de Video")
-            if not st.session_state.lat_f: campos_faltantes.append("Ubicación en el Mapa") 
-
-            # . VALIDACIÓN DE MODO POSITIVO ---
-            if modo == "POSITIVO":
-                if cierre_tipo == "SELECCIONAR": campos_faltantes.append("Cierre Tipo")
-                if cierre_subtipo == "SELECCIONAR": campos_faltantes.append("Cierre Subtipo")
-                if p1 == "SELECCIONAR": campos_faltantes.append("P1")
-            
-            if campos_faltantes:
-                st.error(f"❌ Faltan datos obligatorios: {', '.join(campos_faltantes)}")
-            else:
-                nuevo_registro = {
-                    "MODO": modo,
-                    "FECHA_EVENTO": str(fecha),
-                    "PROVINCIA": provincia, "DISTRITO": distrito, "CORREGIMIENTO": corregimiento,
-                    "REFERENCIA": referencia, "ZP_POLICIAL": zp_policial, "RECURSOS": recursos,
-                    "FECHA_HORA": datetime.now(pytz.timezone('America/Panama')).strftime("%Y-%m-%d %H:%M:%S"),
-                    "CENTRO_DE_MANDO": centro_mando, "UNIDAD_VV": unidad_vv, "CANAL_ENTRADA": canal,
-                    "UNIDAD_DESPACHO": unidad_despacho, "T_INICIAL": str(t_inicial), "H_DESPACHO": str(h_despacho),
-                    "CAMARA_ID": camara_id, "H_ATENCION": str(h_atencion), "H_CIERRE": str(h_cierre),
-                    "TIPO_INCIDENTE": tipo_inc, "SUBTIPO_INCIDENTE": subtipo_inc, "CIERRE_TIPO": cierre_tipo,
-                    "CIERRE_SUBTIPO": cierre_subtipo, "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5, "P6": p6,
-                    "NARRATIVA": narrativa, "LINK_VIDEO": link_video, "LATITUD": str(st.session_state.lat_f),
-                    "LONGITUD": str(st.session_state.lon_f), "VARIANZA_DESPACHO": v_despacho,
-                    "VARIANZA_ATENCION": v_atencion, "VARIANZA_CIERRE": v_cierre,
-                    "VEHICULOS_VERIFICADOS": vehiculos_verificados,
-                    "PERSONAS_VERIFICADAS": personas_verificadas
-                }
-                try:
-                    supabase.table("registros_c5").insert(nuevo_registro, returning='minimal').execute()
-                    st.success("✔️ Registro guardado con éxito.")
-                       
-                except Exception as e:
-                    st.error(f"Error: {e}")
-
-   # --- 7. BARRA LATERAL (Sidebar) ---
-with st.sidebar:
-    # 1. Mostrar usuario
-    if st.session_state.get("autenticado", False):
-        st.write(f"👤 Operador: **{st.session_state.get('usuario_actual', 'Usuario')}**")
-        
-        # 2. Reloj en tiempo real
-        st.subheader("🕒 Hora Actual")
-        reloj_placeholder = st.empty()
-        
-        # Inyectamos un pequeño script de JavaScript para que el reloj avance solo
-        # sin recargar la página completa.
-        import streamlit.components.v1 as components
-        
-        components.html(
-            """
-            <div id="reloj" style="font-size: 24px; font-weight: bold; color: #F4FF00;"></div>
-            <script>
-                function actualizarReloj() {
-                    const ahora = new Date();
-                    const opciones = { timeZone: 'America/Panama', hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' };
-                    document.getElementById('reloj').innerText = ahora.toLocaleTimeString('es-PA', opciones);
-                }
-                setInterval(actualizarReloj, 1000);
-                actualizarReloj();
-            </script>
-            """,
-            height=40
+        fig_bar = px.bar(
+            conteo_delitos,
+            x='Tipo de Delito',
+            y='Cantidad',
+            text='Cantidad',
+            color='Tipo de Delito',
+            color_discrete_sequence=['#00ffff', '#00ff66', '#ff3333', '#ffa500', '#bd00ff', '#ffff00']
         )
         
-        # 3. Botón de Cerrar Sesión (Ahora es totalmente estable)
-        st.divider()
-        if st.button("Cerrar Sesión"):
-            st.session_state.autenticado = False
-            st.session_state.usuario_actual = None 
-            st.rerun()
+        fig_bar.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='white',
+            xaxis=dict(showgrid=False, title='Tipo de Delito'),
+            yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)', title='Total de Casos'),
+            margin=dict(t=20, b=20, l=20, r=20),
+            height=360,
+            showlegend=False
+        )
+        fig_bar.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False)
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    # --- SECCIÓN 2: GRÁFICO EJECUTIVO DE ZONAS POLICIALES ---
+    st.markdown("""
+        <div class="neon-section-box">
+            <div class="neon-section-title">🏙️ INCIDENTES POR ZONA POLICIAL (ORDEN EJECUTIVO DE MAYOR A MENOR)</div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    if col_zona in df_filtrado.columns:
+        conteo_zonas = df_filtrado[col_zona].value_counts().reset_index()
+        conteo_zonas.columns = ['Zona Policial', 'Total Casos']
+        conteo_zonas = conteo_zonas.sort_values(by='Total Casos', ascending=False)
+        
+        fig_zonas = px.bar(
+            conteo_zonas,
+            x='Zona Policial',
+            y='Total Casos',
+            text='Total Casos',
+            color='Total Casos',
+            color_continuous_scale=['#00d2ff', '#0072ff', '#bd00ff', '#ff3366', '#ff9900', '#00ffcc']
+        )
+        
+        fig_zonas.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='white',
+            xaxis=dict(showgrid=False, title='Zona Policial', tickangle=-20),
+            yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)', title='Cantidad de Casos'),
+            margin=dict(t=20, b=40, l=20, r=20),
+            height=380,
+            coloraxis_showscale=False
+        )
+        
+        fig_zonas.update_traces(
+            textfont_size=13, 
+            textangle=0, 
+            textposition="outside", 
+            cliponaxis=False,
+            marker=dict(line=dict(width=1.5, color='#00ffff'))
+        )
+        
+        st.plotly_chart(fig_zonas, use_container_width=True)
+
+    # --- SECCIÓN 3: DOS GRÁFICOS HORIZONTALES (MESES Y DÍAS) ---
+    col_h1, col_h2 = st.columns(2)
+
+    with col_h1:
+        st.markdown("""
+            <div class="neon-section-box">
+                <div class="neon-section-title">📅 TOTAL DE CASOS POR MESES</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if 'Mes_Num' in df_filtrado.columns and 'Mes_Nombre' in df_filtrado.columns:
+            conteo_meses = df_filtrado.groupby(['Mes_Num', 'Mes_Nombre']).size().reset_index(name='Total Casos')
+            conteo_meses = conteo_meses.sort_values(by='Mes_Num', ascending=True)
+            
+            fig_meses = px.bar(
+                conteo_meses,
+                x='Total Casos',
+                y='Mes_Nombre',
+                orientation='h',
+                text='Total Casos',
+                color='Total Casos',
+                color_continuous_scale=['#00ff66', '#00d2ff', '#0072ff']
+            )
+            
+            orden_meses_fijo = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
+            fig_meses.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='white',
+                xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)', title='Total de Casos'),
+                yaxis=dict(showgrid=False, title='', categoryorder='array', categoryarray=orden_meses_fijo[::-1]),
+                margin=dict(t=10, b=20, l=10, r=20),
+                height=350,
+                coloraxis_showscale=False
+            )
+            fig_meses.update_traces(textfont_size=12, textposition="inside", marker=dict(line=dict(width=1, color='#00ff66')))
+            st.plotly_chart(fig_meses, use_container_width=True)
+
+    with col_h2:
+        st.markdown("""
+            <div class="neon-section-box">
+                <div class="neon-section-title">📆 TOTAL DE CASOS POR DÍA DE LA SEMANA</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if 'Dia_Semana' in df_filtrado.columns:
+            orden_dias = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO']
+            conteo_dias = df_filtrado['Dia_Semana'].value_counts().reindex(orden_dias).reset_index()
+            conteo_dias.columns = ['Día', 'Total Casos']
+            conteo_dias['Total Casos'] = conteo_dias['Total Casos'].fillna(0)
+            
+            fig_dias = px.bar(
+                conteo_dias,
+                x='Total Casos',
+                y='Día',
+                orientation='h',
+                text='Total Casos',
+                color='Total Casos',
+                color_continuous_scale=['#ffae00', '#ff3333', '#bd00ff']
+            )
+            
+            fig_dias.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='white',
+                xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)', title='Total de Casos'),
+                yaxis=dict(showgrid=False, title='', categoryorder='array', categoryarray=orden_dias[::-1]),
+                margin=dict(t=10, b=20, l=10, r=20),
+                height=350,
+                coloraxis_showscale=False
+            )
+            fig_dias.update_traces(textfont_size=12, textposition="inside", marker=dict(line=dict(width=1, color='#ffae00')))
+            st.plotly_chart(fig_dias, use_container_width=True)
+
+    # --- SECCIÓN 4: ESTUDIO TEMPORAL DE HORAS ---
+    st.markdown("""
+        <div class="neon-section-box">
+            <div class="neon-section-title">⏰ ESTUDIO DE INCIDENCIA POR FRANJA HORARIA (00:00 A 23:59 HRS)</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    if 'Hora_int' in df_filtrado.columns:
+        conteo_horas = df_filtrado['Hora_int'].value_counts().reindex(range(24), fill_value=0).reset_index()
+        conteo_horas.columns = ['Hora', 'Total Casos']
+        conteo_horas['Hora_Str'] = conteo_horas['Hora'].astype(str).str.zfill(2) + ":00 hrs"
+
+        fig_horas = px.area(
+            conteo_horas,
+            x='Hora_Str',
+            y='Total Casos',
+            markers=True,
+            text='Total Casos',
+            color_discrete_sequence=['#00ffff']
+        )
+
+        fig_horas.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='white',
+            xaxis=dict(showgrid=False, title='Franja Horaria del Día'),
+            yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)', title='Cantidad de Casos'),
+            margin=dict(t=20, b=20, l=20, r=20),
+            height=380,
+            showlegend=False
+        )
+        
+        fig_horas.update_traces(
+            mode='lines+markers+text',
+            textposition='top center',
+            textfont_size=11,
+            line=dict(width=3, color='#00ffff'),
+            marker=dict(size=8, color='#ff0055', line=dict(width=2, color='#ffffff')),
+            fill='tozeroy',
+            fillcolor='rgba(0, 255, 255, 0.15)'
+        )
+        
+        st.plotly_chart(fig_horas, use_container_width=True)
+
+    # --- SECCIÓN 5: CENTRO DE CONTROL GEOESPACIAL (FOLIUM HÍBRIDO CON CALOR MASIVO) ---
+    st.markdown("""
+        <div class="neon-section-box">
+            <div class="neon-section-title">🛰️ CENTRO DE CONTROL GEOESPACIAL Y MAPA TÁCTICO MASIVO</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    modo_mapa = st.radio(
+        "Seleccione la Capa de Visualización del Mapa:",
+        ["🔥 3. Mapa de Calor (Density)", "📍 2. Mapa de Incidentes (Puntos)", "🌐 1. Mapa por Grupo (Cluster / Agrupado)"],
+        horizontal=True
+    )
+
+    if 'Lat_clean' in df_filtrado.columns and 'Lon_clean' in df_filtrado.columns:
+        df_geo = df_filtrado.dropna(subset=['Lat_clean', 'Lon_clean']).copy()
+        df_geo = df_geo[(df_geo['Lat_clean'] != 0) & (df_geo['Lon_clean'] != 0)]
+        
+        if not df_geo.empty:
+            lat_centro = df_geo['Lat_clean'].mean()
+            lon_centro = df_geo['Lon_clean'].mean()
+
+            # Mapa base con nombres de calles, corregimientos y provincias bien visibles
+            m = folium.Map(
+                location=[lat_centro, lon_centro],
+                zoom_start=10,
+                tiles='CartoDB positron'
+            )
+            
+            # Capa base satelital HD combinada
+            folium.TileLayer(
+                tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                attr='Esri Satellite',
+                name='Satelite HD',
+                overlay=False,
+                control=True
+            ).add_to(m)
+
+            if modo_mapa == "🔥 3. Mapa de Calor (Density)":
+                heat_data = [[row['Lat_clean'], row['Lon_clean'], 1.0] for _, row in df_geo.iterrows()]
+                HeatMap(
+                    heat_data,
+                    min_opacity=0.4,
+                    max_zoom=14,
+                    radius=18,
+                    blur=22,
+                    gradient={0.2: 'blue', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1.0: 'red'}
+                ).add_to(m)
+
+            elif modo_mapa == "📍 2. Mapa de Incidentes (Puntos)":
+                muestra_geo = df_geo.head(3000) if len(df_geo) > 3000 else df_geo
+                for _, row in muestra_geo.iterrows():
+                    folium.CircleMarker(
+                        location=[row['Lat_clean'], row['Lon_clean']],
+                        radius=5,
+                        color='#ff0055',
+                        fill=True,
+                        fill_color='#00ffff',
+                        fill_opacity=0.9,
+                        popup=f"<b>Delito:</b> {row.get('Tipo', 'N/A')}<br><b>Zona:</b> {row.get(col_zona, 'N/A')}<br><b>Fecha:</b> {row.get('FECHA', 'N/A')}"
+                    ).add_to(m)
+
+            else:
+                marker_cluster = MarkerCluster().add_to(m)
+                muestra_geo = df_geo.head(3000) if len(df_geo) > 3000 else df_geo
+                for _, row in muestra_geo.iterrows():
+                    folium.Marker(
+                        location=[row['Lat_clean'], row['Lon_clean']],
+                        popup=f"<b>Tipo:</b> {row.get('Tipo', 'N/A')}<br><b>Zona:</b> {row.get(col_zona, 'N/A')}"
+                    ).add_to(marker_cluster)
+
+            st_folium(m, use_container_width=True, height=600)
+            st.success(f"🗺️ **Mapa Táctico Operativo Activado:** Mostrando exitosamente **{len(df_geo):,} casos** geolocalizados con nombres de calles, corregimientos y provincias.")
+        else:
+            st.warning("No hay coordenadas válidas disponibles para los filtros seleccionados.")
+    else:
+        st.error("No se detectaron las columnas de coordenadas en el conjunto de datos.")
+
+except Exception as e:
+    st.error(f"Error al cargar o procesar los datos del dashboard: {e}")
