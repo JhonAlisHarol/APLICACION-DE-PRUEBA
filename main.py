@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import folium
-from folium.plugins import HeatMap, MarkerCluster
+from folium.plugins import HeatMap
 from streamlit_folium import st_folium
 
 st.set_page_config(
@@ -379,7 +379,7 @@ try:
         
         st.plotly_chart(fig_horas, use_container_width=True)
 
-    # --- SECCIÓN 5: CENTRO DE CONTROL GEOESPACIAL (FOLIUM HÍBRIDO CON CALOR MASIVO) ---
+    # --- SECCIÓN 5: CENTRO DE CONTROL GEOESPACIAL (MAPA HÍBRIDO GOOGLE MAPS + CALOR RÁPIDO) ---
     st.markdown("""
         <div class="neon-section-box">
             <div class="neon-section-title">🛰️ CENTRO DE CONTROL GEOESPACIAL Y MAPA TÁCTICO MASIVO</div>
@@ -400,30 +400,25 @@ try:
             lat_centro = df_geo['Lat_clean'].mean()
             lon_centro = df_geo['Lon_clean'].mean()
 
-            # Mapa base con nombres de calles, corregimientos y provincias bien visibles
-            m = folium.Map(
-                location=[lat_centro, lon_centro],
-                zoom_start=10,
-                tiles='CartoDB positron'
-            )
-            
-            # Capa base satelital HD combinada
+            # Mapa base idéntico al que probaste y que carga de inmediato sin ponerse lento
+            m = folium.Map(location=[lat_centro, lon_centro], zoom_start=11)
             folium.TileLayer(
-                tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                attr='Esri Satellite',
-                name='Satelite HD',
+                tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                attr='Google',
+                name='Google Hybrid',
                 overlay=False,
                 control=True
             ).add_to(m)
 
             if modo_mapa == "🔥 3. Mapa de Calor (Density)":
+                # Mapa de calor masivo optimizado de alto rendimiento
                 heat_data = [[row['Lat_clean'], row['Lon_clean'], 1.0] for _, row in df_geo.iterrows()]
                 HeatMap(
                     heat_data,
-                    min_opacity=0.4,
+                    min_opacity=0.3,
                     max_zoom=14,
-                    radius=18,
-                    blur=22,
+                    radius=15,
+                    blur=20,
                     gradient={0.2: 'blue', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1.0: 'red'}
                 ).add_to(m)
 
@@ -432,29 +427,30 @@ try:
                 for _, row in muestra_geo.iterrows():
                     folium.CircleMarker(
                         location=[row['Lat_clean'], row['Lon_clean']],
-                        radius=5,
+                        radius=4,
                         color='#ff0055',
                         fill=True,
                         fill_color='#00ffff',
-                        fill_opacity=0.9,
-                        popup=f"<b>Delito:</b> {row.get('Tipo', 'N/A')}<br><b>Zona:</b> {row.get(col_zona, 'N/A')}<br><b>Fecha:</b> {row.get('FECHA', 'N/A')}"
+                        fill_opacity=0.8,
+                        popup=f"<b>Delito:</b> {row.get('Tipo', 'N/A')}<br><b>Zona:</b> {row.get(col_zona, 'N/A')}"
                     ).add_to(m)
 
             else:
+                from folium.plugins import MarkerCluster
                 marker_cluster = MarkerCluster().add_to(m)
                 muestra_geo = df_geo.head(3000) if len(df_geo) > 3000 else df_geo
                 for _, row in muestra_geo.iterrows():
                     folium.Marker(
                         location=[row['Lat_clean'], row['Lon_clean']],
-                        popup=f"<b>Tipo:</b> {row.get('Tipo', 'N/A')}<br><b>Zona:</b> {row.get(col_zona, 'N/A')}"
+                        popup=f"<b>Tipo:</b> {row.get('Tipo', 'N/A')}"
                     ).add_to(marker_cluster)
 
-            st_folium(m, use_container_width=True, height=600)
-            st.success(f"🗺️ **Mapa Táctico Operativo Activado:** Mostrando exitosamente **{len(df_geo):,} casos** geolocalizados con nombres de calles, corregimientos y provincias.")
+            st_folium(m, width=1250, height=600, key="mapa_tactico_c5")
+            st.success(f"🗺️ **Mapa Operativo Activado:** Mostrando exitosamente **{len(df_geo):,} casos** geolocalizados con calles, avenidas y corregimientos en alta definición.")
         else:
             st.warning("No hay coordenadas válidas disponibles para los filtros seleccionados.")
     else:
         st.error("No se detectaron las columnas de coordenadas en el conjunto de datos.")
 
 except Exception as e:
-    st.error(f"Error al cargar o procesar los datos del dashboard: {e}")
+    st.error(f"Error al procesar el sistema geoespacial: {e}")
