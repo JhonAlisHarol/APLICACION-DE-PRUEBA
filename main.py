@@ -511,7 +511,7 @@ else:
                             popup=f"<b>Tipo:</b> {row.get('Tipo', 'N/A')}"
                         ).add_to(marker_cluster)
 
-                st_folium(m, width=1250, height=600, key="mapa_tactico_final_seguro")
+                st_folium(m, width=1350, height=700, key="mapa_tactico_final_seguro")
                 st.success(f"🗺️ **Mapa Operativo Activado:** Visualizando **{len(df_geo):,} casos** con mapa de calor fluido y controles activos.")
             else:
                 st.warning("No hay coordenadas válidas disponibles para los filtros seleccionados.")
