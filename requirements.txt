@@ -1,6 +1,7 @@
 streamlit
 pandas
+pydeck
+requests
+plotly
 folium
 streamlit-folium
-supabase
-pytz
