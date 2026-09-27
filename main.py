@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import folium
-from folium.plugins import HeatMap
+from folium.plugins import HeatMap, MarkerCluster, Fullscreen
 from streamlit_folium import st_folium
 
 st.set_page_config(
@@ -123,10 +123,16 @@ try:
             pd.to_numeric(df['Hora'].astype(str).str.split(':').str[0], errors='coerce')
         )
 
-    # Limpieza blindada de coordenadas
+    # Limpieza blindada de coordenadas (comas por puntos)
     if 'LATITUD' in df.columns and 'LONGITUD' in df.columns:
-        df['Lat_clean'] = pd.to_numeric(df['LATITUD'].astype(str).str.replace(r'[^0-9.\-]', '', regex=True), errors='coerce')
-        df['Lon_clean'] = pd.to_numeric(df['LONGITUD'].astype(str).str.replace(r'[^0-9.\-]', '', regex=True), errors='coerce')
+        df['Lat_clean'] = pd.to_numeric(
+            df['LATITUD'].astype(str).str.replace(',', '.', regex=False).str.replace(r'[^0-9.\-]', '', regex=True), 
+            errors='coerce'
+        )
+        df['Lon_clean'] = pd.to_numeric(
+            df['LONGITUD'].astype(str).str.replace(',', '.', regex=False).str.replace(r'[^0-9.\-]', '', regex=True), 
+            errors='coerce'
+        )
 
     col_zona = 'DescripcionZonaPolicial' if 'DescripcionZonaPolicial' in df.columns else 'ZonaPolicial'
     
@@ -379,7 +385,7 @@ try:
         
         st.plotly_chart(fig_horas, use_container_width=True)
 
-    # --- SECCIÓN 5: CENTRO DE CONTROL GEOESPACIAL (MAPA HÍBRIDO GOOGLE MAPS + CALOR RÁPIDO) ---
+    # --- SECCIÓN 5: CENTRO DE CONTROL GEOESPACIAL (MAPA HÍBRIDO + PANTALLA COMPLETA + CALOR) ---
     st.markdown("""
         <div class="neon-section-box">
             <div class="neon-section-title">🛰️ CENTRO DE CONTROL GEOESPACIAL Y MAPA TÁCTICO MASIVO</div>
@@ -400,30 +406,32 @@ try:
             lat_centro = df_geo['Lat_clean'].mean()
             lon_centro = df_geo['Lon_clean'].mean()
 
-            # Mapa base idéntico al que probaste y que carga de inmediato sin ponerse lento
-            m = folium.Map(location=[lat_centro, lon_centro], zoom_start=11)
+            # Mapa base con vista satelital híbrida Google
+            m = folium.Map(location=[lat_centro, lon_centro], zoom_start=10)
             folium.TileLayer(
                 tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-                attr='Google',
+                attr='Google Hybrid',
                 name='Google Hybrid',
                 overlay=False,
                 control=True
             ).add_to(m)
 
+            # Botón de pantalla completa limpio y operativo
+            Fullscreen(position="topright", title="Pantalla Completa", title_cancel="Salir de Pantalla Completa").add_to(m)
+
             if modo_mapa == "🔥 3. Mapa de Calor (Density)":
-                # Mapa de calor masivo optimizado de alto rendimiento
-                heat_data = [[row['Lat_clean'], row['Lon_clean'], 1.0] for _, row in df_geo.iterrows()]
+                heat_data = df_geo[['Lat_clean', 'Lon_clean']].values.tolist()
                 HeatMap(
                     heat_data,
-                    min_opacity=0.3,
+                    min_opacity=0.4,
                     max_zoom=14,
-                    radius=15,
-                    blur=20,
+                    radius=18,
+                    blur=22,
                     gradient={0.2: 'blue', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1.0: 'red'}
                 ).add_to(m)
 
             elif modo_mapa == "📍 2. Mapa de Incidentes (Puntos)":
-                muestra_geo = df_geo.head(3000) if len(df_geo) > 3000 else df_geo
+                muestra_geo = df_geo.head(3000)
                 for _, row in muestra_geo.iterrows():
                     folium.CircleMarker(
                         location=[row['Lat_clean'], row['Lon_clean']],
@@ -436,17 +444,16 @@ try:
                     ).add_to(m)
 
             else:
-                from folium.plugins import MarkerCluster
                 marker_cluster = MarkerCluster().add_to(m)
-                muestra_geo = df_geo.head(3000) if len(df_geo) > 3000 else df_geo
+                muestra_geo = df_geo.head(3000)
                 for _, row in muestra_geo.iterrows():
                     folium.Marker(
                         location=[row['Lat_clean'], row['Lon_clean']],
                         popup=f"<b>Tipo:</b> {row.get('Tipo', 'N/A')}"
                     ).add_to(marker_cluster)
 
-            st_folium(m, width=1250, height=600, key="mapa_tactico_c5")
-            st.success(f"🗺️ **Mapa Operativo Activado:** Mostrando exitosamente **{len(df_geo):,} casos** geolocalizados con calles, avenidas y corregimientos en alta definición.")
+            st_folium(m, width=1250, height=600, key="mapa_tactico_limpio_final")
+            st.success(f"🗺️ **Mapa Operativo Activado:** Visualizando **{len(df_geo):,} casos** con mapa de calor fluido y controles activos.")
         else:
             st.warning("No hay coordenadas válidas disponibles para los filtros seleccionados.")
     else:
