@@ -444,7 +444,7 @@ else:
             
             st.plotly_chart(fig_horas, use_container_width=True, config={'displayModeBar': True})
 
-        # --- SECCIÓN 5: CENTRO DE CONTROL GEOESPACIAL (MAPA HÍBRIDO + PANTALLA COMPLETA) ---
+        # --- SECCIÓN 5: CENTRO DE CONTROL GEOESPACIAL (MAPA HÍBRIDO + CLÚSTER TOTAL DE 21,640 CASOS) ---
         st.markdown("""
             <div class="neon-section-box">
                 <div class="neon-section-title">🛰️ CENTRO DE CONTROL GEOESPACIAL Y MAPA TÁCTICO MASIVO</div>
@@ -490,8 +490,7 @@ else:
                     ).add_to(m)
 
                 elif modo_mapa == "📍 2. Mapa de Incidentes (Puntos)":
-                    muestra_geo = df_geo.head(3000)
-                    for _, row in muestra_geo.iterrows():
+                    for _, row in df_geo.iterrows():
                         folium.CircleMarker(
                             location=[row['Lat_clean'], row['Lon_clean']],
                             radius=4,
@@ -503,16 +502,21 @@ else:
                         ).add_to(m)
 
                 else:
-                    marker_cluster = MarkerCluster().add_to(m)
-                    muestra_geo = df_geo.head(3000)
-                    for _, row in muestra_geo.iterrows():
+                    # CLÚSTER MASIVO PARA EL 100% DE LOS CASOS
+                    marker_cluster = MarkerCluster(
+                        maxClusterRadius=40,
+                        disableClusteringAtZoom=15,
+                        spiderfyOnMaxZoom=True
+                    ).add_to(m)
+                    
+                    for _, row in df_geo.iterrows():
                         folium.Marker(
                             location=[row['Lat_clean'], row['Lon_clean']],
-                            popup=f"<b>Tipo:</b> {row.get('Tipo', 'N/A')}"
+                            popup=f"<b>Tipo:</b> {row.get('Tipo', 'N/A')}<br><b>Zona:</b> {row.get(col_zona, 'N/A')}"
                         ).add_to(marker_cluster)
 
-                st_folium(m, width=1400, height=800, key="mapa_tactico_final_seguro")
-                st.success(f"🗺️ **Mapa Operativo Activado:** Visualizando **{len(df_geo):,} casos** con mapa de calor fluido y controles activos.")
+                st_folium(m, width=1250, height=600, key="mapa_tactico_cluster_total")
+                st.success(f"🗺️ **Mapa Operativo Activado:** Visualizando la totalidad de **{len(df_geo):,} casos** en el mapa interactivo.")
             else:
                 st.warning("No hay coordenadas válidas disponibles para los filtros seleccionados.")
         else:
