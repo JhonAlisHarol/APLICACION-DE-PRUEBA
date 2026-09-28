@@ -515,7 +515,7 @@ else:
                             popup=f"<b>Tipo:</b> {row.get('Tipo', 'N/A')}<br><b>Zona:</b> {row.get(col_zona, 'N/A')}"
                         ).add_to(marker_cluster)
 
-                st_folium(m, width=1250, height=600, key="mapa_tactico_cluster_total")
+                st_folium(m, width=1450, height=800, key="mapa_tactico_cluster_total")
                 st.success(f"🗺️ **Mapa Operativo Activado:** Visualizando la totalidad de **{len(df_geo):,} casos** en el mapa interactivo.")
             else:
                 st.warning("No hay coordenadas válidas disponibles para los filtros seleccionados.")
