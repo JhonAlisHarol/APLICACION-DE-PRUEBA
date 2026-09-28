@@ -147,7 +147,7 @@ else:
     """, unsafe_allow_html=True)
 
     # --- CONEXIÓN DIRECTA AL GOOGLE SHEET ---
-    @st.cache_data(ttl=600)
+    @st.cache_data(ttl=300)
     def cargar_datos_zonas():
         url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGwA9lT4NcdV9kosXlRP-yPUgZjPrAEIorpOL1Zb5vmHLB4RRilqAazcSDCvnWtA/pub?output=csv&gid=412219270"
         df = pd.read_csv(url)
