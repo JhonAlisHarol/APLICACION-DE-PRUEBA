@@ -119,6 +119,7 @@ def pantalla_login():
             "ALISJHON": "199432",
             "REGGIE AGUILAR": "40506", 
             "VICTOR MARTINEZ": "12495"
+            "DAMIAN NAVARRO": "11961"
         }
         
         user = st.text_input("Usuario autorizador:")
