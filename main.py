@@ -115,10 +115,10 @@ def pantalla_login():
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         usuarios_permitidos = {
-            "LORENZO BOWEN": "12345678",
+            "LORENZO BOWEN": "10924",
             "ALISJHON": "199432",
-            "CONC5": "CONC505", 
-            "CORCOLON": "CORCOLC3"
+            "REGGIE AGUILAR": "40506", 
+            "VICTOR MARTINEZ": "12495"
         }
         
         user = st.text_input("Usuario autorizador:")
