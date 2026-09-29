@@ -4,6 +4,8 @@ import plotly.express as px
 import folium
 from folium.plugins import HeatMap, MarkerCluster, Fullscreen
 from streamlit_folium import st_folium
+import base64
+import glob
 
 st.set_page_config(
     page_title="Centro de Operación Nacional | Dashboard Analítico",
@@ -11,39 +13,82 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- ESTILOS CSS: OCULTAR MENÚS DE STREAMLIT, FORK, GITHUB Y ESTILOS DE CONTROL ---
-st.markdown("""
+# --- 1. BÚSQUEDA AUTOMÁTICA Y CARGA DEL VIDEO LOCAL EN BASE64 ---
+video_base64 = ""
+archivos_video = glob.glob("*VIDEO*.mp4") + glob.glob("*video*.mp4") + glob.glob("*.mp4")
+
+if archivos_video:
+    try:
+        with open(archivos_video[0], "rb") as f:
+            video_base64 = base64.b64encode(f.read()).decode()
+    except Exception as e:
+        print(f"Error cargando video: {e}")
+
+# --- 2. ESTILOS CSS: VIDEO DE FONDO, EFECTOS NEÓN Y TRANSPARENCIA ---
+st.markdown(f"""
     <style>
     /* Ocultar elementos de Streamlit, Deploy, Fork y GitHub */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .stDeployButton {display: none !important;}
-    div[data-testid="stToolbar"] {display: none !important;}
-    button[kind="header"] {display: none !important;}
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    header {{visibility: hidden;}}
+    .stDeployButton {{display: none !important;}}
+    div[data-testid="stToolbar"] {{display: none !important;}}
+    button[kind="header"] {{display: none !important;}}
+    .viewerBadge_container__1QSob {{display: none !important;}}
+    iframe[title="streamlit/streamlit/static"] {{display: none !important;}}
+    div.creator-badge {{display: none !important;}}
     
-    /* Ocultar botón de Fork y distintivo flotante inferior derecho */
-    .viewerBadge_container__1QSob {display: none !important;}
-    iframe[title="streamlit/streamlit/static"] {display: none !important;}
-    div.creator-badge {display: none !important;}
-    
-    /* Fondo general oscuro estilo centro de control */
-    .stApp {
-        background-color: #0b0f19;
+    /* Fondo de video fijo a pantalla completa */
+    .video-background {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -99999;
+        overflow: hidden;
+        pointer-events: none;
+    }}
+    .video-background video {{
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+    }}
+
+    /* Capa oscura semitransparente para contraste corporativo óptimo */
+    .bg-overlay {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(11, 15, 25, 0.78);
+        z-index: -99998;
+        pointer-events: none;
+    }}
+
+    /* Transparencia total en contenedores principales de Streamlit */
+    .stApp, .block-container, [data-testid="stVerticalBlock"] {{
+        background: transparent !important;
         color: #ffffff;
-    }
+    }}
+    
+    /* Fondo oscuro semitransparente para el menú lateral */
+    [data-testid="stSidebar"] {{
+        background-color: rgba(11, 15, 25, 0.88) !important;
+    }}
     
     /* Animación fluida de desplazamiento para la cinta de colores de neón */
-    @keyframes neonBorderMove {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
+    @keyframes neonBorderMove {{
+        0% {{ background-position: 0% 50%; }}
+        50% {{ background-position: 100% 50%; }}
+        100% {{ background-position: 0% 50%; }}
+    }}
 
     /* Contenedor del Título Principal con Cinta Neón en Movimiento */
-    .neon-title-container {
+    .neon-title-container {{
         border: 4px solid transparent;
-        background: linear-gradient(135deg, #101828 0%, #0b0f19 100%), 
+        background: linear-gradient(135deg, rgba(16, 24, 40, 0.9) 0%, rgba(11, 15, 25, 0.9) 100%), 
                     linear-gradient(90deg, #ff0055, #00ffff, #00ff66, #ffae00, #bd00ff, #ff0055);
         background-origin: border-box;
         background-clip: padding-box, border-box;
@@ -54,29 +99,29 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(255, 0, 85, 0.3);
         margin-bottom: 30px;
-    }
+    }}
     
-    .neon-title-text {
+    .neon-title-text {{
         color: #00ffff;
         font-size: 28px;
         font-weight: 800;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         letter-spacing: 1.5px;
         text-shadow: 0 0 15px rgba(0, 255, 255, 0.9), 0 0 25px rgba(255, 0, 85, 0.6);
-    }
+    }}
     
-    .neon-sub-text {
+    .neon-sub-text {{
         color: #ffae00;
         font-size: 14px;
         font-style: italic;
         margin-top: 10px;
         text-shadow: 0 0 10px rgba(255, 174, 0, 0.8);
-    }
+    }}
 
     /* Contenedores con Marcos de Neón Multicolor en Movimiento para las Secciones */
-    .neon-section-box {
+    .neon-section-box {{
         border: 3px solid transparent;
-        background: rgba(16, 24, 40, 0.7), 
+        background: rgba(16, 24, 40, 0.8), 
                     linear-gradient(90deg, #00ffff, #bd00ff, #ff0055, #00ff66, #00ffff);
         background-origin: border-box;
         background-clip: padding-box, border-box;
@@ -87,16 +132,23 @@ st.markdown("""
         margin-top: 25px;
         margin-bottom: 15px;
         box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-    }
+    }}
 
-    .neon-section-title {
+    .neon-section-title {{
         color: #00ff66;
         font-size: 19px;
         font-weight: 700;
         text-shadow: 0 0 10px rgba(0, 255, 102, 0.8), 0 0 20px rgba(0, 255, 255, 0.5);
         letter-spacing: 0.5px;
-    }
+    }}
     </style>
+    
+    <div class="video-background">
+        <video autoplay loop muted playsinline>
+            <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
+        </video>
+    </div>
+    <div class="bg-overlay"></div>
 """, unsafe_allow_html=True)
 
 # --- CONTROL DE ESTADO DE AUTENTICACIÓN ---
@@ -118,8 +170,7 @@ def pantalla_login():
             "LORENZO BOWEN": "10924",
             "ALISJHON": "199432",
             "REGGIE AGUILAR": "40506", 
-            "VICTOR MARTINEZ": "12495",
-            "DAMIAN NAVARRO": "11961"
+            "VICTOR MARTINEZ": "12495"
         }
         
         user = st.text_input("Usuario autorizador:")
@@ -283,7 +334,7 @@ else:
                 showlegend=False
             )
             fig_bar.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False)
-            st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': True})
+            st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': 'hover'})
 
         # --- SECCIÓN 2: GRÁFICO EJECUTIVO DE ZONAS POLICIALES ---
         st.markdown("""
@@ -325,7 +376,7 @@ else:
                 marker=dict(line=dict(width=1.5, color='#00ffff'))
             )
             
-            st.plotly_chart(fig_zonas, use_container_width=True, config={'displayModeBar': True})
+            st.plotly_chart(fig_zonas, use_container_width=True, config={'displayModeBar': 'hover'})
 
         # --- SECCIÓN 3: DOS GRÁFICOS HORIZONTALES (MESES Y DÍAS) ---
         col_h1, col_h2 = st.columns(2)
@@ -363,7 +414,7 @@ else:
                     coloraxis_showscale=False
                 )
                 fig_meses.update_traces(textfont_size=12, textposition="inside", marker=dict(line=dict(width=1, color='#00ff66')))
-                st.plotly_chart(fig_meses, use_container_width=True, config={'displayModeBar': True})
+                st.plotly_chart(fig_meses, use_container_width=True, config={'displayModeBar': 'hover'})
 
         with col_h2:
             st.markdown("""
@@ -399,7 +450,7 @@ else:
                     coloraxis_showscale=False
                 )
                 fig_dias.update_traces(textfont_size=12, textposition="inside", marker=dict(line=dict(width=1, color='#ffae00')))
-                st.plotly_chart(fig_dias, use_container_width=True, config={'displayModeBar': True})
+                st.plotly_chart(fig_dias, use_container_width=True, config={'displayModeBar': 'hover'})
 
         # --- SECCIÓN 4: ESTUDIO TEMPORAL DE HORAS ---
         st.markdown("""
@@ -443,7 +494,7 @@ else:
                 fillcolor='rgba(0, 255, 255, 0.15)'
             )
             
-            st.plotly_chart(fig_horas, use_container_width=True, config={'displayModeBar': True})
+            st.plotly_chart(fig_horas, use_container_width=True, config={'displayModeBar': 'hover'})
 
         # --- SECCIÓN 5: CENTRO DE CONTROL GEOESPACIAL (MAPA HÍBRIDO + CLÚSTER TOTAL DE 21,640 CASOS) ---
         st.markdown("""
