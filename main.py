@@ -170,7 +170,8 @@ def pantalla_login():
             "LORENZO BOWEN": "10924",
             "ALISJHON": "199432",
             "REGGIE AGUILAR": "40506", 
-            "VICTOR MARTINEZ": "12495"
+            "VICTOR MARTINEZ": "12495", 
+            "JAVIER GONZALEZ": "25720"
         }
         
         user = st.text_input("Usuario autorizador:")
